@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Home Page
+{% endblock %}
+
+{% block head %}
+<!-- Add an index-specific script if needed -->
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Welcome to the Homepage</h1>
+<p>This paragraph is injected seamlessly into the main block of the base template!</p>
+<button onclick="startWatering()">Start Watering</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function startWatering() {
+    fetch('/water')
+        .then(response => response.text())
+        .then(data => alert(data));
+}
+</script>
+{% endblock %}
