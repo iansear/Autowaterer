@@ -1,38 +1,16 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Home Page
-{% endblock %}
-
-{% block head %}
-<!-- Add an index-specific script if needed -->
-<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+Home - Autowaterer
 {% endblock %}
 
 {% block content %}
-<h1>Welcome to the Homepage</h1>
-<p>This paragraph is injected seamlessly into the main block of the base template!</p>
-<button id="water-button" onclick="startWatering()">Start Watering</button>
+<h1>Autowaterer</h1>
+<p>Autowaterer is a simple web application that allows you to start watering your plants.</p>
+<button id="water-button" data-water-url="{{ url_for('autowater.water') }}">Start Watering</button>
 <p id="water-status"></p>
 {% endblock %}
 
 {% block scripts %}
-<script>
-async function startWatering() {
-    const button = document.getElementById('water-button');
-    const status = document.getElementById('water-status');
-
-    button.disabled = true;
-    status.textContent = 'Starting...';
-
-    try {
-        const response = await fetch('{{ url_for("autowater.water") }}', { method: 'POST' });
-        status.textContent = await response.text();
-    } catch (error) {
-        status.textContent = `Could not reach the server: ${error.message}`;
-    } finally {
-        button.disabled = false;
-    }
-}
-</script>
+<script src="{{ url_for('static', filename='js/water.js') }}"></script>
 {% endblock %}

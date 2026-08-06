@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Web App{% endblock %}</title>
+    <title>{% block title %}Autowaterer{% endblock %}</title>
     
     <!-- Link your global CSS stylesheet here -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -15,8 +15,8 @@
 
     <!-- Global Navigation Bar (Repeated on all pages) -->
     <nav>
-        <a href="/">Home</a> | 
-        <a href="/about">About</a>
+        <a href="/">Home</a>
+        {# <a href="/about">About</a> #}
     </nav>
 
     <!-- Main Content Area (Filled dynamically by child templates) -->
@@ -27,7 +27,7 @@
 
     <!-- Global Footer (Repeated on all pages) -->
     <footer>
-        <p>&copy; 2026 My Web App</p>
+        <p>&copy; 2026 Autowaterer</p>
     </footer>
 
     {% block scripts %}{% endblock %}
