@@ -12,15 +12,27 @@ Home Page
 {% block content %}
 <h1>Welcome to the Homepage</h1>
 <p>This paragraph is injected seamlessly into the main block of the base template!</p>
-<button onclick="startWatering()">Start Watering</button>
+<button id="water-button" onclick="startWatering()">Start Watering</button>
+<p id="water-status"></p>
 {% endblock %}
 
 {% block scripts %}
 <script>
-function startWatering() {
-    fetch('/water')
-        .then(response => response.text())
-        .then(data => alert(data));
+async function startWatering() {
+    const button = document.getElementById('water-button');
+    const status = document.getElementById('water-status');
+
+    button.disabled = true;
+    status.textContent = 'Starting...';
+
+    try {
+        const response = await fetch('{{ url_for("autowater.water") }}', { method: 'POST' });
+        status.textContent = await response.text();
+    } catch (error) {
+        status.textContent = `Could not reach the server: ${error.message}`;
+    } finally {
+        button.disabled = false;
+    }
 }
 </script>
 {% endblock %}

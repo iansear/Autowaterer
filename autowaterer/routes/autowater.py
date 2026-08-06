@@ -12,7 +12,7 @@ async def index():
     return await render_template('water.html')
 
 
-@bp.route('/water')
+@bp.route('/water', methods=['POST'])
 async def water():
     if not try_start_watering(current_app):
         return "Pump is already running, try again in a moment.", 409

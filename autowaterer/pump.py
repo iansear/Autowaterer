@@ -23,7 +23,7 @@ async def _water_plants():
     try:
         print("Turning on the pump!")
         PUMP_RELAY.on()
-        await time.sleep(WATER_SECONDS)
+        await asyncio.sleep(WATER_SECONDS)
     finally:
         PUMP_RELAY.off()
         PUMP_LOCK.release()
