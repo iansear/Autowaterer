@@ -24,14 +24,18 @@ async def water():
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
+    print('Turning on pump')
     if not turn_on_pump():
+        print('Failed to turn on pump')
         return 'Failed to turn on pump', 500
     start_time = time.time()
     return f'Pump turned on at {start_time.strftime("%Y-%m-%d %H:%M:%S")}', 200
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
+    print('Turning off pump')
     if not turn_off_pump():
+        print('Failed to turn off pump')
         return 'Failed to turn off pump', 500
     end_time = time.time()
     return f'Pump turned off, ran for {end_time - start_time:.2f} seconds', 200
