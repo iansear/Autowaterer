@@ -16,7 +16,7 @@ async def index():
 
 @bp.route('/water', methods=['POST'])
 async def water():
-    if not try_start_watering():
+    if not try_start_watering(current_app):
         return "Pump is already running, try again in a moment.", 409
 
     print("Watering the plants!")
