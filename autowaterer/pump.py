@@ -28,3 +28,25 @@ async def _water_plants():
         PUMP_RELAY.off()
         PUMP_LOCK.release()
         print("Plants watered!")
+
+def turn_on_pump():
+    if not PUMP_LOCK.acquire(blocking=False):
+        return False
+    try:
+        PUMP_RELAY.on()
+        return True
+    except Exception as e:
+        print(f'Error turning on pump: {e}')
+        PUMP_LOCK.release()
+        return False
+        
+
+def turn_off_pump():
+    try:
+        PUMP_RELAY.off()
+        return True
+    except Exception as e:
+        print(f'Error turning off pump: {e}')
+        return False
+    finally:
+        PUMP_LOCK.release()

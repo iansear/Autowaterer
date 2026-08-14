@@ -7,8 +7,12 @@ Home - Autowaterer
 {% block content %}
 <h1>Autowaterer</h1>
 <p>Autowaterer is a simple web application that allows you to start watering your plants.</p>
-<p>Hello Dad!</p>
 <button id="water-button" data-water-url="{{ url_for('autowater.water') }}">Start Watering</button>
+
+<div class="button-group">
+    <button id="turn-on-pump-button" data-turn-on-pump-url="{{ url_for('autowater.turn_on_pump') }}">Turn On Pump</button>
+    <button id="turn-off-pump-button" data-turn-off-pump-url="{{ url_for('autowater.turn_off_pump') }}">Turn Off Pump</button>
+</div>
 <p id="water-status"></p>
 {% endblock %}
 
