@@ -29,12 +29,11 @@ async def _water_plants():
         PUMP_LOCK.release()
         print("Plants watered!")
 
-async def turn_on_pump():
+def turn_on_pump():
     if not PUMP_LOCK.acquire(blocking=False):
         return False
     try:
         PUMP_RELAY.on()
-        await asyncio.sleep(3)
         return True
     except Exception as e:
         print(f'Error turning on pump: {e}')
