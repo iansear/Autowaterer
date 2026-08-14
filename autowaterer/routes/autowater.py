@@ -29,7 +29,7 @@ async def turn_on_pump():
         print('Failed to turn on pump')
         return 'Failed to turn on pump', 500
     start_time = time.time()
-    return f'Pump turned on at {start_time.strftime("%Y-%m-%d %H:%M:%S")}', 200
+    return f'Pump turned on at {start_time}', 200
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
