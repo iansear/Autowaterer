@@ -2,8 +2,7 @@ import time
 
 from quart import Blueprint, current_app, render_template
 
-# from ..pump import try_start_watering, turn_on_pump, turn_off_pump
-import .pump as pump
+from ..pump import try_start_watering, turn_on_pump, turn_off_pump
 
 bp = Blueprint('autowater', __name__)
 
@@ -17,7 +16,7 @@ async def index():
 
 @bp.route('/water', methods=['POST'])
 async def water():
-    if not pump.try_start_watering():
+    if not try_start_watering():
         return "Pump is already running, try again in a moment.", 409
 
     print("Watering the plants!")
@@ -26,7 +25,7 @@ async def water():
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
     print('Turning on pump')
-    if not await pump.turn_on_pump():
+    if not await turn_on_pump():
         print('Failed to turn on pump')
         return 'Failed to turn on pump', 500
     start_time = time.time()
@@ -35,7 +34,7 @@ async def turn_on_pump():
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
     print('Turning off pump')
-    if not pump.turn_off_pump():
+    if not turn_off_pump():
         print('Failed to turn off pump')
         return 'Failed to turn off pump', 500
     end_time = time.time()
