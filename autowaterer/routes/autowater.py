@@ -44,8 +44,8 @@ async def index():
 
 @bp.route('/schedule-water', methods=['POST'])
 async def schedule_water():
-    time = request.form.get('time')
-    quantity = request.form.get('quantity')
+    time = await request.form.get('time')
+    quantity = await request.form.get('quantity')
     if not time or not quantity:
         return "Time and quantity are required!", 400
     print(f"Scheduling water for {time} at {quantity} ml")
