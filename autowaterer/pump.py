@@ -7,6 +7,8 @@ PUMP_RELAY = Relay(12, False)
 PUMP_LOCK = threading.Lock()
 WATER_SECONDS = 10
 
+#rate is 100ml/80s = 1.25ml/s
+
 # True while the pump is held on manually, so turn_off_pump knows whether the
 # lock is ours to release or belongs to a timed watering run.
 _manual_hold = False

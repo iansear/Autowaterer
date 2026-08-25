@@ -1,13 +1,13 @@
 import time
 
 from quart import Blueprint, current_app, render_template
+#from quart_tasks import QuartTasks
 
-from .. import pump
+from ..classes.pump import Pump
 
 bp = Blueprint('autowater', __name__)
 
-pump_started_at = None
-
+water_pump_1 = Pump(12, 1.25)
 
 @bp.route('/')
 async def index():
@@ -16,36 +16,21 @@ async def index():
 
 @bp.route('/water', methods=['POST'])
 async def water():
-    if not pump.try_start_watering(current_app):
-        return "Pump is already running, try again in a moment.", 409
-
-    print("Watering the plants!")
-    return f"Watering started at {time.strftime('%Y-%m-%d %H:%M:%S')}", 202
-
+    if water_pump_1.is_running():
+        return "Pump is already running!", 400
+    current_app.add_background_task(water_pump_1.test_water_pump)
+    return "Watering the plants!", 200
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
-    global pump_started_at
-
-    print('Turning on pump')
-    if not pump.turn_on_pump():
-        return 'Pump is already running, try again in a moment.', 409
-
-    pump_started_at = time.time()
-    return f'Pump turned on at {time.strftime("%Y-%m-%d %H:%M:%S")}', 200
-
+    if water_pump_1.is_running():
+        return "Pump is already running!", 400
+    if not water_pump_1.turn_on():
+        return "Failed to turn on pump!", 500
+    return "Turning on pump!", 200
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
-    global pump_started_at
-
-    print('Turning off pump')
-    if not pump.turn_off_pump():
-        return 'Failed to turn off pump', 500
-
-    if pump_started_at is None:
-        return 'Pump turned off.', 200
-
-    ran_for = time.time() - pump_started_at
-    pump_started_at = None
-    return f'Pump turned off, ran for {ran_for:.2f} seconds', 200
+    if not water_pump_1.turn_off():
+        return "Failed to turn off pump!", 500
+    return "Turning off pump!", 200
