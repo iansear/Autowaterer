@@ -50,3 +50,8 @@ class Pump(Relay):
         self.turn_on()
         time.sleep(10)
         self.turn_off()
+
+    def run_water_pump(self, quantity: float):
+        self.turn_on()
+        time.sleep(quantity / self.rate)
+        self.turn_off()

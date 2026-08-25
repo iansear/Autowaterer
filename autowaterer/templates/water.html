@@ -14,6 +14,31 @@ Home - Autowaterer
     <button id="turn-off-pump-button" data-turn-off-pump-url="{{ url_for('autowater.turn_off_pump') }}">Turn Off Pump</button>
 </div>
 <p id="water-status"></p>
+
+<h2>Schedule</h2>
+<form action="{{ url_for('autowater.schedule_water') }}" method="post">
+    <input type="time" name="time" id="time" required>
+    <input type="number" name="quantity" id="quantity" required>
+    <button type="submit">Schedule</button>
+</form>
+<table>
+    <thead>
+        <tr>
+            <th>Task ID</th>
+            <th>Function Name</th>
+            <th>Schedule</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in schedule %}
+            <tr>
+                <td>{{ task.task_id }}</td>
+                <td>{{ task.function_name }}</td>
+                <td>{{ task.schedule }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
 
 {% block scripts %}
