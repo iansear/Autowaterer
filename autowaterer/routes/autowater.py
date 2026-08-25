@@ -1,11 +1,10 @@
 from quart import Blueprint, current_app, render_template, request
-from quart_tasks import QuartTasks
+from ..tasks import tasks
 from datetime import datetime
 from ..classes.pump import Pump
 
 bp = Blueprint('autowater', __name__)
 water_pump_1 = Pump(12, 1.25)
-tasks = QuartTasks(current_app)
 
 def get_schedule():
     active_tasks = []
