@@ -10,7 +10,8 @@ def get_schedule():
     active_tasks = []
     
     # Safely access the internal tasks storage dictionary
-    for task_id, task in tasks._tasks.items():
+    print(tasks._tasks)
+    for task_id, task in tasks._tasks:
         active_tasks.append({
             "task_id": task_id,
             "function_name": task.func.__name__,
