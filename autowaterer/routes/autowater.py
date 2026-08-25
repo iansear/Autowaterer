@@ -44,8 +44,9 @@ async def index():
 
 @bp.route('/schedule-water', methods=['POST'])
 async def schedule_water():
-    time = await request.form.get('time')
-    quantity = await request.form.get('quantity')
+    form = await request.form
+    time = form.get('time')
+    quantity = form.get('quantity')
     if not time or not quantity:
         return "Time and quantity are required!", 400
     print(f"Scheduling water for {time} at {quantity} ml")
@@ -58,7 +59,7 @@ async def schedule_water():
 async def water():
     if water_pump_1.is_running():
         return "Pump is already running!", 400
-    current_app.add_background_task(water_pump_1.run_water_pump)
+    current_app.add_background_task(water_pump_1.test_water_pump)
     return "Watering the plants!", 200
 
 @bp.route('/turn-on-pump', methods=['POST'])
