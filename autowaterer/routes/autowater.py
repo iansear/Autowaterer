@@ -6,19 +6,19 @@ from ..classes.pump import Pump
 bp = Blueprint('autowater', __name__)
 water_pump_1 = Pump(12, 1.25)
 
-def get_schedule():
-    active_tasks = []
+# def get_schedule():
+#     active_tasks = []
     
-    # Safely access the internal tasks storage dictionary
-    print(tasks._tasks)
-    for task_id, task in tasks._tasks:
-        active_tasks.append({
-            "task_id": task_id,
-            "function_name": task.func.__name__,
-            # The schedule attribute contains information about the interval or cron syntax
-            "schedule": str(task.schedule)  
-        })
-    return active_tasks
+#     # Safely access the internal tasks storage dictionary
+#     print(tasks._tasks)
+#     for task_id, task in tasks._tasks:
+#         active_tasks.append({
+#             "task_id": task_id,
+#             "function_name": task.func.__name__,
+#             # The schedule attribute contains information about the interval or cron syntax
+#             "schedule": str(task.schedule)  
+#         })
+#     return active_tasks
 
 def time_to_cron(time_str: str) -> str:
     """
@@ -40,7 +40,7 @@ def time_to_cron(time_str: str) -> str:
 
 @bp.route('/')
 async def index():
-    return await render_template('water.html', schedule=get_schedule())
+    return await render_template('water.html', schedule=[])
 
 @bp.route('/schedule-water', methods=['POST'])
 async def schedule_water():
@@ -51,16 +51,16 @@ async def schedule_water():
         return "Time and quantity are required!", 400
     print(f"Scheduling water for {time} at {quantity} ml")
     cron_time = time_to_cron(time)
-    tasks.schedule_cron(water_pump_1.test_water_pump, cron_time, args=(quantity), task_id='water_cron_test')
-    return await render_template('water.html', schedule=get_schedule())
+    # tasks.schedule_cron(water_pump_1.run_water_pump, cron_time, args=(quantity), task_id='water_cron_test')
+    return await render_template('water.html', schedule=[])
 
 # Test routes for the pump
 @bp.route('/water', methods=['POST'])
 async def water():
     if water_pump_1.is_running():
         return "Pump is already running!", 400
-    current_app.add_background_task(water_pump_1.test_water_pump)
-    return "Watering the plants!", 200
+    current_app.add_background_task(water_pump_1.run_water_pump(10))
+    return "Pump test, 10ml", 200
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
@@ -68,7 +68,7 @@ async def turn_on_pump():
         return "Pump is already running!", 400
     if not water_pump_1.turn_on():
         return "Failed to turn on pump!", 500
-    return "Turning on pump!", 200
+    return "Turning on pump!", 200s
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():

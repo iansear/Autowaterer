@@ -36,7 +36,7 @@ class Pump(Relay):
 
     # Gets the pump status
     def is_running(self):
-        return self.is_active
+        return self.lock.locked()
 
     # Sets and gets the rate of the pump in ml/s
     def set_rate(self, rate):
@@ -46,10 +46,10 @@ class Pump(Relay):
         return self.rate
 
     # Test water pump for 10 seconds
-    def test_water_pump(self):
-        self.turn_on()
-        time.sleep(10)
-        self.turn_off()
+    # def test_water_pump(self):
+    #     self.turn_on()
+    #     time.sleep(10)
+    #     self.turn_off()
 
     def run_water_pump(self, quantity: float):
         self.turn_on()
