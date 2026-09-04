@@ -20,6 +20,7 @@ async def schedule_water():
     if time and quantity:
         try:
             parsed_time = datetime.strptime(time.strip(), "%H:%M")
+            quantity = float(quantity)
             print(f"Parsed time: {parsed_time}, {parsed_time.hour}, {parsed_time.minute}")
             # APScheduler has a dedicated cron trigger method out of the box!
             scheduler.add_job(
