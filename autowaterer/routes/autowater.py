@@ -68,7 +68,7 @@ async def turn_on_pump():
         return "Pump is already running!", 400
     if not water_pump_1.turn_on():
         return "Failed to turn on pump!", 500
-    return "Turning on pump!", 200s
+    return "Turning on pump!", 200
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
