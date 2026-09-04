@@ -24,7 +24,6 @@ Home - Autowaterer
 <table>
     <thead>
         <tr>
-            <th>Task ID</th>
             <th>Name</th>
             <th>Schedule</th>
         </tr>
@@ -32,7 +31,6 @@ Home - Autowaterer
     <tbody>
         {% for task in schedule %}
             <tr>
-                <td>{{ task.id }}</td>
                 <td>{{ task.name }}</td>
                 <td>{{ task.next_run_time }}</td>
             </tr>

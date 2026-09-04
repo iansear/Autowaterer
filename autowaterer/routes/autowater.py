@@ -15,14 +15,10 @@ async def schedule_water():
     time = form.get('time')
     quantity = form.get('quantity')
 
-    print(f"Scheduling water for {time} at {quantity} ml")
-
     if time and quantity:
         try:
-            parsed_time = datetime.strptime(time.strip(), "%H:%M")
             quantity = float(quantity)
-            print(f"Parsed time: {parsed_time}, {parsed_time.hour}, {parsed_time.minute}")
-            # APScheduler has a dedicated cron trigger method out of the box!
+            parsed_time = datetime.strptime(time.strip(), "%H:%M")
             scheduler.add_job(
                 water_pump_1.run_water_pump,
                 name=f'{quantity}ml at {parsed_time.hour}:{parsed_time.minute}',
@@ -31,14 +27,13 @@ async def schedule_water():
                 minute=parsed_time.minute,
                 args=[quantity]
             )
-            print(f'Job added: {scheduler.get_jobs()}')
         except Exception as e:
             print(f"Error scheduling water: {e}")
             flash(f"Error scheduling water: {e}")
     else:
         print('Time and quantity are required!')
         flash('Time and quantity are required!')
-    return await render_template('water.html', schedule=scheduler.get_jobs())
+    return redirect(url_for('autowater.index'))
 
 # Test routes for the pump
 @bp.route('/water', methods=['POST'])
@@ -47,18 +42,18 @@ async def water():
         return "Pump is already running!", 400
     test_quantity = 50
     current_app.add_background_task(water_pump_1.run_water_pump(test_quantity))
-    return f"Pump test, {test_quantity}ml", 200
+    return f"Pump test - dispensing {test_quantity}ml", 200
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
     if water_pump_1.is_running():
-        return "Pump is already running!", 400
+        return "Pump is already running", 400
     if not water_pump_1.turn_on():
-        return "Failed to turn on pump!", 500
-    return "Turning on pump!", 200
+        return "Failed to turn on pump", 500
+    return "Turning on pump", 200
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
     if not water_pump_1.turn_off():
-        return "Failed to turn off pump!", 500
-    return "Turning off pump!", 200
+        return "Failed to turn off pump", 500
+    return "Turning off pump", 200
