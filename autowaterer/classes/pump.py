@@ -46,7 +46,7 @@ class Pump(Relay):
             return False
 
     # Runs the water pump for a given quantity in ml
-    def run_water_pump(self, quantity: float):
+    def run_water_pump(self, quantity = 10):
         self.turn_on()
         print(f'Running water pump for {quantity/self.rate} seconds')
         time.sleep(quantity / self.rate)
