@@ -29,10 +29,10 @@ Home - Autowaterer
         </tr>
     </thead>
     <tbody>
-        {% for task in schedule %}
+        {% for job in schedule %}
             <tr>
-                <td>{{ task.name }}</td>
-                <td>{{ formatDateTime(task.next_run_time) }}</td>
+                <td>{{ job.name }}</td>
+                <td>{{ job.next_run_time }}</td>
             </tr>
         {% endfor %}
     </tbody>
