@@ -11,6 +11,17 @@ class Pump(Relay):
         self.lock = threading.Lock()
         self.rate = rate
 
+    # Gets and sets the rate of the pump in ml/s
+    def get_rate(self):
+        return self.rate
+
+    def set_rate(self, rate):
+        self.rate = rate
+
+    # Gets the pump status
+    def is_running(self):
+        return self.lock.locked()
+
     # These methods are just wrappers around the Relay class's on and off methods.
     def turn_on(self):
         if not self.lock.acquire(blocking=False):
@@ -34,23 +45,7 @@ class Pump(Relay):
             print(f'Error turning off pump: {e}')
             return False
 
-    # Gets the pump status
-    def is_running(self):
-        return self.lock.locked()
-
-    # Sets and gets the rate of the pump in ml/s
-    def set_rate(self, rate):
-        self.rate = rate
-
-    def get_rate(self):
-        return self.rate
-
-    # Test water pump for 10 seconds
-    # def test_water_pump(self):
-    #     self.turn_on()
-    #     time.sleep(10)
-    #     self.turn_off()
-
+    # Runs the water pump for a given quantity in ml
     def run_water_pump(self, quantity: float):
         self.turn_on()
         time.sleep(quantity / self.rate)

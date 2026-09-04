@@ -23,6 +23,11 @@
     <main>
         {% block content %}
         {% endblock %}
+
+        <!-- Display flashed messages -->
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
     </main>
 
     <!-- Global Footer (Repeated on all pages) -->

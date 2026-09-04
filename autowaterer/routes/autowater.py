@@ -1,66 +1,48 @@
 from quart import Blueprint, current_app, render_template, request
-from ..tasks import tasks
 from datetime import datetime
-from ..classes.pump import Pump
+from ..config.pump_config import water_pump_1
+from ..config.schedule_config import scheduler
 
 bp = Blueprint('autowater', __name__)
-water_pump_1 = Pump(12, 1.25)
-
-# def get_schedule():
-#     active_tasks = []
-    
-#     # Safely access the internal tasks storage dictionary
-#     print(tasks._tasks)
-#     for task_id, task in tasks._tasks:
-#         active_tasks.append({
-#             "task_id": task_id,
-#             "function_name": task.func.__name__,
-#             # The schedule attribute contains information about the interval or cron syntax
-#             "schedule": str(task.schedule)  
-#         })
-#     return active_tasks
-
-def time_to_cron(time_str: str) -> str:
-    """
-    Converts 'HH:MM' string to a daily cron expression 'M H * * *'
-    Example: '14:30' -> '30 14 * * *'
-    Example: '09:05' -> '5 9 * * *'
-    """
-    try:
-        # Parse the input string safely to validate format
-        parsed_time = datetime.strptime(time_str.strip(), "%H:%M")
-        
-        # Strip leading zeros for cleaner cron syntax (optional, but standard)
-        minute = parsed_time.minute
-        hour = parsed_time.hour
-        
-        return f"{minute} {hour} * * *"
-    except ValueError:
-        raise ValueError("Invalid time format. Please use 'HH:MM' (24-hour format).")
 
 @bp.route('/')
 async def index():
-    return await render_template('water.html', schedule=[])
+    return await render_template('water.html', schedule=scheduler.get_jobs())
 
 @bp.route('/schedule-water', methods=['POST'])
 async def schedule_water():
     form = await request.form
     time = form.get('time')
     quantity = form.get('quantity')
-    if not time or not quantity:
-        return "Time and quantity are required!", 400
-    print(f"Scheduling water for {time} at {quantity} ml")
-    cron_time = time_to_cron(time)
-    # tasks.schedule_cron(water_pump_1.run_water_pump, cron_time, args=(quantity), task_id='water_cron_test')
-    return await render_template('water.html', schedule=[])
+
+    if time and quantity:
+        try:
+            parsed_time = datetime.strptime(time.strip(), "%H:%M")
+            
+            # APScheduler has a dedicated cron trigger method out of the box!
+            scheduler.add_job(
+                water_pump_1.run_water_pump,
+                trigger='cron',
+                hour=parsed_time.hour,
+                minute=parsed_time.minute,
+                args=[quantity]
+            )
+        except Exception as e:
+            print(f"Error scheduling water: {e}")
+            flash(f"Error scheduling water: {e}")
+    else:
+        print('Time and quantity are required!')
+        flash('Time and quantity are required!')
+    return await render_template('water.html', schedule=scheduler.get_jobs())
 
 # Test routes for the pump
 @bp.route('/water', methods=['POST'])
 async def water():
     if water_pump_1.is_running():
         return "Pump is already running!", 400
-    current_app.add_background_task(water_pump_1.run_water_pump(10))
-    return "Pump test, 10ml", 200
+    test_quantity = 50
+    current_app.add_background_task(water_pump_1.run_water_pump(test_quantity))
+    return f"Pump test, {test_quantity}ml", 200
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
