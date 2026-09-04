@@ -25,16 +25,16 @@ Home - Autowaterer
     <thead>
         <tr>
             <th>Task ID</th>
-            <th>Function Name</th>
+            <th>Name</th>
             <th>Schedule</th>
         </tr>
     </thead>
     <tbody>
         {% for task in schedule %}
             <tr>
-                <td>{{ task.task_id }}</td>
-                <td>{{ task.function_name }}</td>
-                <td>{{ task.schedule }}</td>
+                <td>{{ task.id }}</td>
+                <td>{{ task.name }}</td>
+                <td>{{ task.next_run_time }}</td>
             </tr>
         {% endfor %}
     </tbody>
