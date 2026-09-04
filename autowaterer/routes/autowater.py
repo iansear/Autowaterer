@@ -15,10 +15,12 @@ async def schedule_water():
     time = form.get('time')
     quantity = form.get('quantity')
 
+    print(f"Scheduling water for {time} at {quantity} ml")
+
     if time and quantity:
         try:
             parsed_time = datetime.strptime(time.strip(), "%H:%M")
-            
+            print(f"Parsed time: {parsed_time}, {parsed_time.hour}, {parsed_time.minute}")
             # APScheduler has a dedicated cron trigger method out of the box!
             scheduler.add_job(
                 water_pump_1.run_water_pump,
@@ -27,6 +29,7 @@ async def schedule_water():
                 minute=parsed_time.minute,
                 args=[quantity]
             )
+            print(f'Job added: {scheduler.get_jobs()}')
         except Exception as e:
             print(f"Error scheduling water: {e}")
             flash(f"Error scheduling water: {e}")
