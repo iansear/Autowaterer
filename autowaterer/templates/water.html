@@ -32,7 +32,7 @@ Home - Autowaterer
         {% for task in schedule %}
             <tr>
                 <td>{{ task.name }}</td>
-                <td>{{ task.next_run_time }}</td>
+                <td>{{ formatDateTime(task.next_run_time) }}</td>
             </tr>
         {% endfor %}
     </tbody>
