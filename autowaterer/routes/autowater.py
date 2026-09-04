@@ -25,6 +25,7 @@ async def schedule_water():
             # APScheduler has a dedicated cron trigger method out of the box!
             scheduler.add_job(
                 water_pump_1.run_water_pump,
+                name=f'{quantity}ml at {parsed_time.hour}:{parsed_time.minute}',
                 trigger='cron',
                 hour=parsed_time.hour,
                 minute=parsed_time.minute,
