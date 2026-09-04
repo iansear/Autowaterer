@@ -4,8 +4,20 @@ from .config.schedule_config import scheduler
 
 def create_app():
     app = Quart(__name__, instance_relative_config=True)
+    init_pump_1()
     from .routes.autowater import bp
     app.register_blueprint(bp)
-    init_pump_1()
-    scheduler.start()
+
+    @app.before_serving
+    async def start_scheduler():
+        if not scheduler.running:
+            scheduler.start()
+            print('Scheduler started...')
+
+    @app.after_serving
+    async def stop_scheduler():
+        if scheduler.running:
+            scheduler.shutdown(wait=False)
+            print('Scheduler stopped...')
+
     return app
