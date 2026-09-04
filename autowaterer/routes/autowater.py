@@ -7,7 +7,14 @@ bp = Blueprint('autowater', __name__)
 
 @bp.route('/')
 async def index():
-    return await render_template('water.html', schedule=scheduler.get_jobs())
+    jobs = []
+    for job in scheduler.get_jobs():
+        jobs.append({
+            'id': job.id,
+            'name': job.name,
+            'next_run_time': job.next_run_time.strftime('%Y-%m-%d %H:%M')
+        })
+    return await render_template('water.html', schedule=jobs)
 
 @bp.route('/schedule-water', methods=['POST'])
 async def schedule_water():

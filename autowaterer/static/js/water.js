@@ -24,7 +24,3 @@ function postOnClick(buttonId, urlAttribute) {
 postOnClick('water-button', 'waterUrl');
 postOnClick('turn-on-pump-button', 'turnOnPumpUrl');
 postOnClick('turn-off-pump-button', 'turnOffPumpUrl');
-
-function formatDateTime(date) {
-    return date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit' });
-}
