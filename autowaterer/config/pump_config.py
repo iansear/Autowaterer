@@ -5,7 +5,7 @@ water_pump_1 = None
 def init_pump_1():
     global water_pump_1
     if water_pump_1 is None:
-        water_pump_1 = Pump(12, 1)
+        water_pump_1 = Pump(12, 1.3)
         print('Water pump 1 initialized...')
     else:
         print('Water pump 1 already initialized...')
