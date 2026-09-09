@@ -19,8 +19,12 @@ class Pump(Relay):
         self.rate = rate
 
     def get_time_elapsed(self):
-        if self.start_time is None or self.end_time is None:
-            return 0
+        if self.start_time is None:
+            return 0.0
+        if self.is_running():
+            return round(time.time() - self.start_time, 2)
+        if self.end_time is None:
+            return 0.0
         return round(self.end_time - self.start_time, 2)
 
     # Gets the pump status
@@ -34,6 +38,7 @@ class Pump(Relay):
         try:
             self.on()
             self.start_time = time.time()
+            self.end_time = None
             return True
         except Exception as e:
             print(f'Error turning on pump: {e}')

@@ -1,5 +1,7 @@
-from quart import Blueprint, current_app, flash, render_template, redirect, url_for, request
+from quart import Blueprint, current_app, flash, render_template, redirect, url_for, request, websocket
 from datetime import datetime
+import asyncio
+import json
 from sqlalchemy import select
 from ..config.pump_config import WATER_PUMP_1_RUN, water_pump_1
 from ..config.schedule_config import scheduler
@@ -81,6 +83,21 @@ async def delete_job():
                 await session.delete(db_job)
 
     return redirect(url_for('autowater.index'))
+
+# Web Socket
+@bp.websocket('/pump-status')
+async def pump_status():
+    try:
+        while True:
+            await websocket.send(json.dumps({
+                'running': water_pump_1.is_running(),
+                'elapsed': water_pump_1.get_time_elapsed(),
+            }))
+            await asyncio.sleep(0.5)
+    except asyncio.CancelledError:
+        raise
+    except Exception:
+        return
 
 # Test routes for the pump
 @bp.route('/water', methods=['POST'])

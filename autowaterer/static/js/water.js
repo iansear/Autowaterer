@@ -1,3 +1,4 @@
+// Test Routes
 const waterStatus = document.getElementById('water-status');
 
 function postOnClick(buttonId, urlAttribute) {
@@ -24,3 +25,45 @@ function postOnClick(buttonId, urlAttribute) {
 postOnClick('water-button', 'waterUrl');
 postOnClick('turn-on-pump-button', 'turnOnPumpUrl');
 postOnClick('turn-off-pump-button', 'turnOffPumpUrl');
+
+// Web Socket
+const statusContainer = document.getElementById('status-container');
+const statusText = document.getElementById('status-text');
+
+function pumpStatusSocketUrl() {
+    const path = statusContainer.dataset.pumpStatusUrl;
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}${path}`;
+}
+
+function connectPumpStatus() {
+    if (!statusContainer || !statusText) {
+        return;
+    }
+
+    const socket = new WebSocket(pumpStatusSocketUrl());
+
+    socket.onopen = () => {
+        statusText.textContent = 'Connected. Pump off.';
+    };
+
+    socket.onmessage = (event) => {
+        const status = JSON.parse(event.data);
+        if (status.running) {
+            statusText.textContent = `ON — ${status.elapsed}s`;
+        } else {
+            statusText.textContent = 'OFF';
+        }
+    };
+
+    socket.onclose = () => {
+        statusText.textContent = 'Disconnected. Reconnecting...';
+        setTimeout(connectPumpStatus, 2000);
+    };
+
+    socket.onerror = () => {
+        socket.close();
+    };
+}
+
+connectPumpStatus();
