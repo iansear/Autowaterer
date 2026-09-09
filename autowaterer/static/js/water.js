@@ -33,6 +33,7 @@ const statusText = document.getElementById('status-text');
 function pumpStatusSocketUrl() {
     const path = statusContainer.dataset.pumpStatusUrl;
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    console.log(`${protocol}//${window.location.host}${path}`);
     return `${protocol}//${window.location.host}${path}`;
 }
 
