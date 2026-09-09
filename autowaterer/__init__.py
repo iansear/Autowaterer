@@ -1,7 +1,8 @@
 import os
 from quart import Quart
 from dotenv import load_dotenv
-from .config.pump_config import init_pump_1
+from sqlalchemy import select
+from .config.pump_config import get_job_functions, init_pump_1
 from .config.schedule_config import scheduler
 from .db import db
 from .db.user import User
@@ -27,6 +28,27 @@ def create_app():
     async def setup_db():
         await db.create_all()
         print('Database created...')
+
+    @app.before_serving
+    async def load_jobs():
+        job_functions = get_job_functions()
+        async with db.bind.Session() as session:
+            jobs = (await session.scalars(select(Job))).all()
+
+        for job in jobs:
+            func = job_functions.get(job.function)
+            if func is None:
+                print(f'Skipping job {job.name}: unknown function {job.function!r}')
+                continue
+            scheduler.add_job(
+                func,
+                name=job.name,
+                trigger=job.trigger,
+                hour=job.hour,
+                minute=job.minute,
+                args=job.args,
+            )
+            print(f'Job {job.name} loaded...')
 
     @app.after_serving
     async def stop_scheduler():

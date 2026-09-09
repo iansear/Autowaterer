@@ -1,7 +1,9 @@
 from quart import Blueprint, current_app, flash, render_template, redirect, url_for, request
 from datetime import datetime
-from ..config.pump_config import water_pump_1
+from ..config.pump_config import WATER_PUMP_1_RUN, water_pump_1
 from ..config.schedule_config import scheduler
+from ..db import db
+from ..db.job import Job
 
 bp = Blueprint('autowater', __name__)
 
@@ -34,6 +36,17 @@ async def schedule_water():
                 minute=parsed_time.minute,
                 args=[quantity]
             )
+            job = Job(
+                name=f'{quantity}ml at {parsed_time.hour}:{parsed_time.minute}',
+                function=WATER_PUMP_1_RUN,
+                trigger='cron',
+                hour=parsed_time.hour,
+                minute=parsed_time.minute,
+                args=[quantity]
+            )
+            async with db.bind.Session() as session:
+                async with session.begin():
+                    session.add(job)
         except Exception as e:
             print(f"Error scheduling water: {e}")
             flash(f"Error scheduling water: {e}")
