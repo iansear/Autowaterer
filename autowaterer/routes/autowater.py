@@ -1,5 +1,6 @@
 from quart import Blueprint, current_app, flash, render_template, redirect, url_for, request
 from datetime import datetime
+from sqlalchemy import select
 from ..config.pump_config import WATER_PUMP_1_RUN, water_pump_1
 from ..config.schedule_config import scheduler
 from ..db import db
@@ -30,14 +31,6 @@ async def create_job():
             parsed_time = datetime.strptime(time.strip(), "%H:%M")
             time_label = f'{parsed_time.hour}:{parsed_time.minute:02d}'
             job_name = f'{quantity:g}ml at {time_label}'
-            scheduler.add_job(
-                water_pump_1.run_water_pump,
-                name=job_name,
-                trigger='cron',
-                hour=parsed_time.hour,
-                minute=parsed_time.minute,
-                args=[quantity]
-            )
             job = Job(
                 name=job_name,
                 function=WATER_PUMP_1_RUN,
@@ -49,6 +42,16 @@ async def create_job():
             async with db.bind.Session() as session:
                 async with session.begin():
                     session.add(job)
+                    await session.flush()
+                    scheduler.add_job(
+                        water_pump_1.run_water_pump,
+                        id=str(job.id),
+                        name=job_name,
+                        trigger='cron',
+                        hour=parsed_time.hour,
+                        minute=parsed_time.minute,
+                        args=[quantity]
+                    )
         except Exception as e:
             print(f"Error scheduling water: {e}")
             flash(f"Error scheduling water: {e}")
@@ -61,11 +64,22 @@ async def create_job():
 async def delete_job():
     form = await request.form
     job_id = form.get('job_id')
-    job = await Job.query.get(job_id)
-    scheduler.remove_job(job.name)
+    if not job_id:
+        flash('Job id is required!')
+        return redirect(url_for('autowater.index'))
+
+    sched_job = scheduler.get_job(job_id)
+    if sched_job:
+        scheduler.remove_job(job_id)
+
     async with db.bind.Session() as session:
         async with session.begin():
-            session.delete(job)
+            db_job = None
+            if job_id.isdigit():
+                db_job = await session.get(Job, int(job_id))
+            if db_job is not None:
+                await session.delete(db_job)
+
     return redirect(url_for('autowater.index'))
 
 # Test routes for the pump

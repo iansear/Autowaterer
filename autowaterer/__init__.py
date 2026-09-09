@@ -42,11 +42,13 @@ def create_app():
                 continue
             scheduler.add_job(
                 func,
+                id=str(job.id),
                 name=job.name,
                 trigger=job.trigger,
                 hour=job.hour,
                 minute=job.minute,
                 args=job.args,
+                replace_existing=True,
             )
             print(f'Job {job.name} loaded...')
 
