@@ -175,3 +175,17 @@ footer {
 footer p {
     margin: 0;
 }
+
+
+.flex-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pump-status-container {
+    height: 2rem;
+    width: 2rem;
+    border-radius: 50%;
+    background: grey;
+}

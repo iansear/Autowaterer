@@ -28,14 +28,15 @@
     <thead>
         <tr>
             <th>Name</th>
-            <th>Status</th>
+            <th>Running</th>
         </tr>
     </thead>
     <tbody>
         {% for pump in pumps %}
         <tr>
             <td>{{ pump.name }}</td>
-            <td>
+            <td class="flex-container">
+                <div class="pump-status-container" data-pump-id="{{ pump.id }}"></div>
                 <p class="pump-status" data-pump-id="{{ pump.id }}">Waiting for connection...</p>
             </td>
         </tr>
