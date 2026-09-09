@@ -18,8 +18,8 @@ async def index():
         })
     return await render_template('water.html', schedule=jobs)
 
-@bp.route('/schedule-water', methods=['POST'])
-async def schedule_water():
+@bp.route('/create-job', methods=['POST'])
+async def create_job():
     form = await request.form
     time = form.get('time')
     quantity = form.get('quantity')
@@ -55,6 +55,17 @@ async def schedule_water():
     else:
         print('Time and quantity are required!')
         flash('Time and quantity are required!')
+    return redirect(url_for('autowater.index'))
+
+@bp.route('/delete-job', methods=['POST'])
+async def delete_job():
+    form = await request.form
+    job_id = form.get('job_id')
+    job = await Job.query.get(job_id)
+    scheduler.remove_job(job.name)
+    async with db.bind.Session() as session:
+        async with session.begin():
+            session.delete(job)
     return redirect(url_for('autowater.index'))
 
 # Test routes for the pump

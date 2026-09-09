@@ -16,7 +16,7 @@ Home - Autowaterer
 <p id="water-status"></p>
 
 <h2>Schedule</h2>
-<form action="{{ url_for('autowater.schedule_water') }}" method="post">
+<form action="{{ url_for('autowater.create_job') }}" method="post">
     <input type="time" name="time" id="time" required>
     <input type="number" name="quantity" id="quantity" required>
     <button type="submit">Schedule</button>
@@ -33,6 +33,12 @@ Home - Autowaterer
             <tr>
                 <td>{{ job.name }}</td>
                 <td>{{ job.next_run_time }}</td>
+                <td>
+                    <form action="{{ url_for('autowater.delete_job') }}" method="post">
+                        <input type="hidden" name="job_id" value="{{ job.id }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
