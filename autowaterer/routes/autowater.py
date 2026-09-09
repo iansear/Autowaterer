@@ -203,6 +203,19 @@ async def delete_pump():
     return redirect(url_for('autowater.pumps'))
 
 # Web Socket
+async def _wait_for_stop(delay=0.5):
+    stop = current_app.extensions.get("stop_serving")
+    waiters = [asyncio.create_task(asyncio.sleep(delay))]
+    if stop is not None:
+        waiters.append(asyncio.create_task(stop.wait()))
+    waiters.append(asyncio.create_task(current_app.shutdown_event.wait()))
+    done, pending = await asyncio.wait(waiters, return_when=asyncio.FIRST_COMPLETED)
+    for task in pending:
+        task.cancel()
+    sleeper, *stoppers = waiters
+    return sleeper not in done
+
+
 @bp.websocket('/pump-status')
 async def pump_status():
     try:
@@ -215,7 +228,8 @@ async def pump_status():
                     'elapsed': hardware_pump.get_time_elapsed(),
                 })
             await websocket.send(json.dumps(statuses))
-            await asyncio.sleep(0.5)
+            if await _wait_for_stop():
+                return
     except asyncio.CancelledError:
         raise
     except Exception:
