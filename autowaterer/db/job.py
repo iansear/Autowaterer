@@ -1,12 +1,14 @@
 from datetime import datetime
-from sqlalchemy import DateTime, Integer, String, JSON
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, Integer, String, JSON, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import db
 
 class Job(db.Model):
     __tablename__ = "jobs"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    pump_id: Mapped[int] = mapped_column(ForeignKey("pumps.id"), nullable=False)
+    pump: Mapped["Pump"] = relationship()
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     function: Mapped[str] = mapped_column(String(100), nullable=False)
     trigger: Mapped[str] = mapped_column(String(100), nullable=False)

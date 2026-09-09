@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Schedule</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Next Run Time</th>
+            <th>Pump</th>
+            <th>Quantity</th>
+            <th>Time</th>
+            <th>Minute</th>
+            <th>Created At</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs  %}
+        <tr>
+            <td>{{ job.name }}</td>
+            <td>{{ job.next_run_time }}</td>
+            <td>{{ job.pump }}</td>
+            <td>{{ job.quantity }}</td>
+            <td>{{ job.time }}</td>
+            <td>{{ job.minute }}</td>
+            <td>{{ job.created_at }}</td>
+            <td>
+                <form action="{{ url_for('autowater.delete_job') }}" method="post">
+                    <input type="hidden" name="job_id" value="{{ job.id }}">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a class="button" href="{{ url_for('autowater.create_job') }}">Create Job</a></p>
+{% endblock %}

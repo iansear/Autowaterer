@@ -2,7 +2,8 @@ import os
 from quart import Quart
 from dotenv import load_dotenv
 from sqlalchemy import select
-from .config.pump_config import get_job_functions, init_pump_1
+from .classes.pump import Pump as HardwarePump
+from .config.pump_config import loaded_pumps
 from .config.schedule_config import scheduler
 from .db import db
 from .db.user import User
@@ -14,7 +15,6 @@ def create_app():
     load_dotenv()
     app.secret_key = os.environ.get("QUART_SECRET_KEY", "fallback-not-so-secret-key")
     db.init_app(app)
-    init_pump_1()
     from .routes.autowater import bp
     app.register_blueprint(bp)
 
@@ -29,16 +29,28 @@ def create_app():
         await db.create_all()
         print('Database created...')
 
+
+    @app.before_serving
+    async def load_pumps():
+        async with db.bind.Session() as session:
+            pumps = (await session.scalars(select(Pump))).all()
+            pump_rows = [
+                (pump.id, pump.name, pump.gpio_pin, pump.rate) for pump in pumps
+            ]
+        for pump_id, name, gpio_pin, rate in pump_rows:
+            loaded_pumps[pump_id] = HardwarePump(gpio_pin, rate)
+            print(f'Pump {name} loaded...')
+
     @app.before_serving
     async def load_jobs():
-        job_functions = get_job_functions()
         async with db.bind.Session() as session:
             jobs = (await session.scalars(select(Job))).all()
 
         for job in jobs:
-            func = job_functions.get(job.function)
+            hardware_pump = loaded_pumps.get(job.pump_id)
+            func = getattr(hardware_pump, job.function, None) if hardware_pump else None
             if func is None:
-                print(f'Skipping job {job.name}: unknown function {job.function!r}')
+                print(f'Skipping job {job.name}: unknown pump or function')
                 continue
             scheduler.add_job(
                 func,

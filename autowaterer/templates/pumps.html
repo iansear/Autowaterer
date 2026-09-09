@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Pumps</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>GPIO Pin</th>
+            <th>Rate</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pump in pumps %}
+        <tr>
+            <td>{{ pump.name }}</td>
+            <td>{{ pump.description }}</td>
+            <td>{{ pump.gpio_pin }}</td>
+            <td>{{ pump.rate }}</td>
+            <td>
+                <button id="delete-pump-button" data-pump-id="{{ pump.id }}"><a href="{{ url_for('autowater.delete_pump') }}">Delete</a></button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a class="button" href="{{ url_for('autowater.create_pump') }}">Create Pump</a></p>
+{% endblock %}
