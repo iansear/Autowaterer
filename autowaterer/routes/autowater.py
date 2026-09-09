@@ -29,10 +29,6 @@ async def schedule_water():
             quantity = float(quantity)
             parsed_time = datetime.strptime(time.strip(), "%H:%M")
             time_label = f'{parsed_time.hour}:{parsed_time.minute:02d}'
-            print('parsed_time', parsed_time)
-            print('hour', parsed_time.hour)
-            print('minute', parsed_time.minute)
-            print('time_label', time_label)
             job_name = f'{quantity:g}ml at {time_label}'
             scheduler.add_job(
                 water_pump_1.run_water_pump,
