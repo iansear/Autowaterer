@@ -61,7 +61,7 @@ async def water():
     if water_pump_1.is_running():
         return "Pump is already running!", 400
     test_quantity = 200
-    current_app.add_background_task(water_pump_1.run_water_pump(test_quantity))
+    current_app.add_background_task(water_pump_1.run_water_pump, test_quantity)
     return f"Pump test - dispensing {test_quantity}ml", 200
 
 @bp.route('/turn-on-pump', methods=['POST'])
