@@ -32,15 +32,7 @@ async def list_pumps():
 
 @bp.route('/')
 async def index():
-    jobs = []
-    for job in scheduler.get_jobs():
-        jobs.append({
-            'id': job.id,
-            'name': job.name,
-            'next_run_time': job.next_run_time.strftime('%Y-%m-%d %H:%M')
-        })
-    return await render_template('water.html', schedule=jobs)
-    # return redirect(url_for('autowater.dashboard'))
+    return redirect(url_for('autowater.dashboard'))
 
 # Page routes
 @bp.route('/dashboard')
@@ -89,6 +81,10 @@ async def schedule():
 @bp.route('/pumps')
 async def pumps():
     return await render_template('pumps.html', pumps=await list_pumps())
+
+@bp.route('/tests')
+async def tests():
+    return await render_template('tests.html', pumps=await list_pumps())
 
 # Job routes
 @bp.route('/create-job', methods=['GET', 'POST'])
@@ -197,9 +193,13 @@ async def delete_pump():
     if not pump_id:
         flash('Pump id is required!')
         return redirect(url_for('autowater.pumps'))
-    pump = await db.get(Pump, pump_id)
-    if pump:
-        await db.delete(pump)
+
+    async with db.bind.Session() as session:
+        async with session.begin():
+            pump = await session.get(Pump, int(pump_id))
+            if pump is not None:
+                await session.delete(pump)
+                loaded_pumps.pop(int(pump_id), None)
     return redirect(url_for('autowater.pumps'))
 
 # Web Socket
@@ -222,24 +222,46 @@ async def pump_status():
         return
 
 # Test routes
-@bp.route('/water', methods=['POST'])
-async def water():
-    if water_pump_1.is_running():
-        return "Pump is already running!", 400
+async def loaded_pump_from_form():
+    form = await request.form
+    try:
+        return loaded_pumps.get(int(form.get('pump_id')))
+    except (TypeError, ValueError):
+        return None
+
+
+@bp.route('/test-water', methods=['POST'])
+async def test_water():
+    pump = await loaded_pump_from_form()
+    if pump is None:
+        flash("Pump not found")
+        return redirect(url_for('autowater.tests'))
     test_quantity = 200
-    current_app.add_background_task(water_pump_1.run_water_pump, test_quantity)
-    return f"Pump test - dispensing {test_quantity}ml", 200
+    current_app.add_background_task(pump.run_water_pump, test_quantity)
+    flash(f"Pump test - dispensing {test_quantity}ml")
+    return redirect(url_for('autowater.tests'))
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
-    if water_pump_1.is_running():
-        return "Pump is already running", 400
-    if not water_pump_1.turn_on():
-        return "Failed to turn on pump", 500
-    return "Turning on pump", 200
+    pump = await loaded_pump_from_form()
+    if pump is None:
+        flash("Pump not found")
+        return redirect(url_for('autowater.tests'))
+    if pump.is_running():
+        flash("Pump is already running")
+        return redirect(url_for('autowater.tests'))
+    if not pump.turn_on():
+        flash("Failed to turn on pump")
+        return redirect(url_for('autowater.tests'))
+    return redirect(url_for('autowater.tests'))
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
-    if not water_pump_1.turn_off():
-        return "Failed to turn off pump", 500
-    return "Turning off pump", 200
+    pump = await loaded_pump_from_form()
+    if pump is None:
+        flash("Pump not found")
+        return redirect(url_for('autowater.tests'))
+    if not pump.turn_off():
+        flash("Failed to turn off pump")
+        return redirect(url_for('autowater.tests'))
+    return redirect(url_for('autowater.tests'))

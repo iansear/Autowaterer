@@ -183,7 +183,7 @@ footer p {
     justify-content: center;
 }
 
-.pump-status-container {
+.pump-status-indicator {
     height: 2rem;
     width: 2rem;
     border-radius: 50%;

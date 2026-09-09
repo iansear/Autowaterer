@@ -36,7 +36,7 @@
         <tr>
             <td>{{ pump.name }}</td>
             <td class="flex-container">
-                <div class="pump-status-container" data-pump-id="{{ pump.id }}"></div>
+                <div class="pump-status-indicator" data-pump-id="{{ pump.id }}"></div>
                 <p class="pump-status" data-pump-id="{{ pump.id }}">Waiting for connection...</p>
             </td>
         </tr>
@@ -46,5 +46,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
 {% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Test Page - Autowaterer
+{% endblock %}
+
+{% block content %}
+<h1>Pump Tests</h1>
+<table id="status-container" data-pump-status-url="{{ url_for('autowater.pump_status') }}">
+    <thead>
+        <tr>
+            <th>Pump</th>
+            <th>On</th>
+            <th>Off</th>
+            <th>Test 200ml</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pump in pumps %}
+        <tr>
+            <td>{{ pump.name }}</td>
+            <td>
+                <form action="{{ url_for('autowater.turn_on_pump') }}" method="post">
+                    <input type="hidden" name="pump_id" value="{{ pump.id }}">
+                    <button type="submit">On</button>
+                </form>
+            </td>
+            <td>
+                <form action="{{ url_for('autowater.turn_off_pump') }}" method="post">
+                    <input type="hidden" name="pump_id" value="{{ pump.id }}">
+                    <button type="submit">Off</button>
+                </form>
+            </td>
+            <td>
+                <form action="{{ url_for('autowater.test_water') }}" method="post">
+                    <input type="hidden" name="pump_id" value="{{ pump.id }}">
+                    <button type="submit">Test 200ml</button>
+                </form>
+            </td>
+            <td class="flex-container">
+                <div class="pump-status-indicator" data-pump-id="{{ pump.id }}"></div>
+                <p class="pump-status" data-pump-id="{{ pump.id }}">Waiting for connection...</p>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
+{% endblock %}
