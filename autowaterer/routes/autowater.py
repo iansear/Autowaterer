@@ -46,13 +46,23 @@ async def index():
 @bp.route('/dashboard')
 async def dashboard():
     jobs = []
-    for job in scheduler.get_jobs():
-        jobs.append({
-            'id': job.id,
-            'name': job.name,
-            'next_run_time': job.next_run_time.strftime('%Y-%m-%d %H:%M')
-        })
-    return await render_template('dashboard.html', jobs=jobs)
+    async with db.bind.Session() as session:
+        db_jobs = (await session.scalars(select(Job).options(selectinload(Job.pump)))).all()
+        for job in db_jobs:
+            sched_job = scheduler.get_job(str(job.id))
+            next_run = ''
+            if sched_job and sched_job.next_run_time:
+                next_run = sched_job.next_run_time.strftime('%Y-%m-%d %H:%M')
+            jobs.append({
+                'id': job.id,
+                'name': job.name,
+                'next_run_time': next_run,
+                'pump': job.pump.name if job.pump else '',
+                'quantity': f'{job.args[0]} ml' if job.args else '',
+                'time': f'{job.hour}:{job.minute:02d}',
+            })
+    pumps = await list_pumps()
+    return await render_template('dashboard.html', jobs=jobs, pumps=pumps)
 
 @bp.route('/schedule')
 async def schedule():

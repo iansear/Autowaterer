@@ -2,4 +2,48 @@
 
 {% block content %}
 <h1>Dashboard</h1>
+<h2>Current Schedule</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Pump</th>
+            <th>Quantity</th>
+            <th>Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr>
+            <td>{{ job.name }}</td>
+            <td>{{ job.pump }}</td>
+            <td>{{ job.quantity }}</td>
+            <td>{{ job.time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<h2>Pumps</h2>
+<table  id="status-container" data-pump-status-url="{{ url_for('autowater.pump_status') }}">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pump in pumps %}
+        <tr>
+            <td>{{ pump.name }}</td>
+            <td>
+                <p class="pump-status" data-pump-id="{{ pump.id }}">Waiting for connection...</p>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}
