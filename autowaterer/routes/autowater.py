@@ -3,6 +3,7 @@ from datetime import datetime
 import asyncio
 import json
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from ..classes.pump import Pump as HardwarePump
 from ..config.pump_config import loaded_pumps
 from ..config.schedule_config import scheduler
@@ -57,7 +58,7 @@ async def dashboard():
 async def schedule():
     jobs = []
     async with db.bind.Session() as session:
-        db_jobs = (await session.scalars(select(Job))).all()
+        db_jobs = (await session.scalars(select(Job).options(selectinload(Job.pump)))).all()
         for job in db_jobs:
             sched_job = scheduler.get_job(str(job.id))
             next_run = ''
