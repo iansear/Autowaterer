@@ -21,15 +21,17 @@ function connectPumpStatus() {
     socket.onmessage = (event) => {
         const statuses = JSON.parse(event.data);
         statuses.forEach((status) => {
-            const statusText = document.querySelector(`.pump-status[data-pump-id="${status.id}"]`);
-            if (statusText) {
-                statusText.textContent = status.running ? `ON — ${status.elapsed}s` : 'OFF';
-            }
             const statusIndicator = document.querySelector(
                 `.pump-status-indicator[data-pump-id="${status.id}"]`
             );
             if (statusIndicator) {
                 statusIndicator.style.background = status.running ? 'green' : 'red';
+            }
+            const elapsed = document.querySelector(
+                `.pump-elapsed[data-pump-id="${status.id}"]`
+            );
+            if (elapsed) {
+                elapsed.textContent = `${status.elapsed}s`;
             }
         });
     };

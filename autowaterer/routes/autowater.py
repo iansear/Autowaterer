@@ -26,6 +26,7 @@ async def list_pumps():
                 'description': pump.description,
                 'gpio_pin': pump.gpio_pin,
                 'rate': pump.rate,
+                'last_run': pump.last_run.strftime('%Y-%m-%d %H:%M:%S') if pump.last_run else '',
             }
             for pump in pumps
         ]

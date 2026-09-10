@@ -29,6 +29,7 @@
         <tr>
             <th>Name</th>
             <th>Running</th>
+            <th>Last Run</th>
         </tr>
     </thead>
     <tbody>
@@ -37,8 +38,8 @@
             <td>{{ pump.name }}</td>
             <td class="flex-container">
                 <div class="pump-status-indicator" data-pump-id="{{ pump.id }}"></div>
-                <p class="pump-status" data-pump-id="{{ pump.id }}">Waiting for connection...</p>
             </td>
+            <td>{{ pump.last_run }}</td>
         </tr>
         {% endfor %}
     </tbody>

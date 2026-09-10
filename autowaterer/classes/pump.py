@@ -9,6 +9,7 @@ class Pump(Relay):
         self.rate = rate
         self.start_time = None
         self.end_time = None
+        self.last_run = None
         self._stop = threading.Event()
 
     def interrupt(self):
@@ -30,6 +31,9 @@ class Pump(Relay):
             return 0.0
         return round(self.end_time - self.start_time, 2)
 
+    def get_last_run(self):
+        return self.last_run
+
     def is_running(self):
         return self.lock.locked()
 
@@ -41,6 +45,7 @@ class Pump(Relay):
             self.on()
             self.start_time = time.time()
             self.end_time = None
+            self.last_run = time.time()
             return True
         except Exception as e:
             print(f'Error turning on pump: {e}')

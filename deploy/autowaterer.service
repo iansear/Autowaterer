@@ -1,0 +1,18 @@
+[Unit]
+Description=Autowaterer plant watering server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=locke
+Group=locke
+SupplementaryGroups=gpio
+WorkingDirectory=/home/locke/Repos/Autowaterer
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/locke/autowater-venv/bin/hypercorn run:app --bind 0.0.0.0:8000 --workers 1
+Restart=always
+RestartSec=5
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

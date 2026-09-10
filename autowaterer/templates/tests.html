@@ -14,6 +14,7 @@ Test Page - Autowaterer
             <th>Off</th>
             <th>Test 200ml</th>
             <th>Status</th>
+            <th>Elapsed</th>
         </tr>
     </thead>
     <tbody>
@@ -40,7 +41,9 @@ Test Page - Autowaterer
             </td>
             <td class="flex-container">
                 <div class="pump-status-indicator" data-pump-id="{{ pump.id }}"></div>
-                <p class="pump-status" data-pump-id="{{ pump.id }}">Waiting for connection...</p>
+            </td>
+            <td>
+                <p class="pump-elapsed" data-pump-id="{{ pump.id }}"></p>
             </td>
         </tr>
         {% endfor %}
