@@ -1,21 +1,19 @@
 const statusContainer = document.getElementById('status-container');
-const statusTexts = document.querySelectorAll('.pump-status');
+const statusText = document.getElementById('pump-status-text');
 
 function pumpStatusSocketUrl() {
     return statusContainer.dataset.pumpStatusUrl;
 }
 
 function connectPumpStatus() {
-    if (!statusContainer || !statusTexts.length) {
+    if (!statusContainer || !statusText) {
         return;
     }
 
     const socket = new WebSocket(pumpStatusSocketUrl());
 
     socket.onopen = () => {
-        statusTexts.forEach((statusText) => {
-            statusText.textContent = 'Connected.';
-        });
+        statusText.textContent = 'Connected.';
     };
 
     socket.onmessage = (event) => {
@@ -43,13 +41,12 @@ function connectPumpStatus() {
     };
 
     socket.onclose = () => {
-        statusTexts.forEach((statusText) => {
-            statusText.textContent = 'Disconnected. Reconnecting...';
-        });
+        statusText.textContent = 'Disconnected. Reconnecting...';
         setTimeout(connectPumpStatus, 2000);
     };
 
     socket.onerror = () => {
+        statusText.textContent = 'Error. Reconnecting...';
         socket.close();
     };
 }
