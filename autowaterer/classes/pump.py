@@ -1,3 +1,4 @@
+from datetime import datetime
 from .relay import Relay
 import threading
 import time
@@ -45,7 +46,7 @@ class Pump(Relay):
             self.on()
             self.start_time = time.time()
             self.end_time = None
-            self.last_run = time.time()
+            self.last_run = datetime.now()
             return True
         except Exception as e:
             print(f'Error turning on pump: {e}')

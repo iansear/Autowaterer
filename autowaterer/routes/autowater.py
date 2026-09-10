@@ -222,11 +222,18 @@ async def pump_status():
         while True:
             statuses = []
             for pump_id, hardware_pump in loaded_pumps.items():
+                last_run = hardware_pump.get_last_run()
+                if isinstance(last_run, datetime):
+                    last_run_text = last_run.strftime('%Y-%m-%d %H:%M:%S')
+                elif last_run:
+                    last_run_text = str(last_run)
+                else:
+                    last_run_text = ''
                 statuses.append({
                     'id': pump_id,
                     'running': hardware_pump.is_running(),
                     'elapsed': hardware_pump.get_time_elapsed(),
-                    'last_run': hardware_pump.get_last_run().strftime('%Y-%m-%d %H:%M:%S') if hardware_pump.get_last_run() else '',
+                    'last_run': last_run_text,
                 })
             await websocket.send(json.dumps(statuses))
             if await _wait_for_stop():
@@ -234,6 +241,7 @@ async def pump_status():
     except asyncio.CancelledError:
         raise
     except Exception:
+        current_app.logger.exception('pump-status websocket error')
         return
 
 # Test routes
