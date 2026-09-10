@@ -33,6 +33,12 @@ function connectPumpStatus() {
             if (elapsed) {
                 elapsed.textContent = `${status.elapsed}s`;
             }
+            const lastRun = document.querySelector(
+                `.pump-last-run[data-pump-id="${status.id}"]`
+            );
+            if (lastRun) {
+                lastRun.textContent = status.last_run;
+            }
         });
     };
 

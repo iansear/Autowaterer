@@ -26,7 +26,6 @@ async def list_pumps():
                 'description': pump.description,
                 'gpio_pin': pump.gpio_pin,
                 'rate': pump.rate,
-                'last_run': pump.last_run.strftime('%Y-%m-%d %H:%M:%S') if pump.last_run else '',
             }
             for pump in pumps
         ]
@@ -227,6 +226,7 @@ async def pump_status():
                     'id': pump_id,
                     'running': hardware_pump.is_running(),
                     'elapsed': hardware_pump.get_time_elapsed(),
+                    'last_run': hardware_pump.get_last_run().strftime('%Y-%m-%d %H:%M:%S') if hardware_pump.get_last_run() else '',
                 })
             await websocket.send(json.dumps(statuses))
             if await _wait_for_stop():
