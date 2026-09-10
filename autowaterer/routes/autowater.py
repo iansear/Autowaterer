@@ -101,19 +101,19 @@ async def create_job():
     quantity = form.get('quantity')
 
     if not (name and pump_id and time and quantity):
-        flash('Name, pump, time, and quantity are required!')
+        await flash('Name, pump, time, and quantity are required!')
         return await render_template('create_job.html', pumps=pumps)
 
     try:
         pump_id = int(pump_id)
         quantity = float(quantity)
         if quantity <= 0:
-            flash('Quantity must be greater than 0.')
+            await flash('Quantity must be greater than 0.')
             return await render_template('create_job.html', pumps=pumps)
 
         hardware_pump = loaded_pumps.get(pump_id)
         if hardware_pump is None:
-            flash('Unknown pump.')
+            await flash('Unknown pump.')
             return await render_template('create_job.html', pumps=pumps)
 
         parsed_time = datetime.strptime(time.strip(), "%H:%M")
@@ -141,7 +141,7 @@ async def create_job():
                 )
     except Exception as e:
         print(f"Error scheduling water: {e}")
-        flash(f"Error scheduling water: {e}")
+        await flash(f"Error scheduling water: {e}")
         return await render_template('create_job.html', pumps=pumps)
 
     return redirect(url_for('autowater.schedule'))
@@ -151,7 +151,7 @@ async def delete_job():
     form = await request.form
     job_id = form.get('job_id')
     if not job_id:
-        flash('Job id is required!')
+        await flash('Job id is required!')
         return redirect(url_for('autowater.index'))
 
     sched_job = scheduler.get_job(job_id)
@@ -192,7 +192,7 @@ async def delete_pump():
     form = await request.form
     pump_id = form.get('pump_id')
     if not pump_id:
-        flash('Pump id is required!')
+        await flash('Pump id is required!')
         return redirect(url_for('autowater.pumps'))
 
     async with db.bind.Session() as session:
@@ -249,24 +249,24 @@ async def loaded_pump_from_form():
 async def test_water():
     pump = await loaded_pump_from_form()
     if pump is None:
-        flash("Pump not found")
+        await flash("Pump not found")
         return redirect(url_for('autowater.tests'))
     test_quantity = 200
     current_app.add_background_task(pump.run_water_pump, test_quantity)
-    flash(f"Pump test - dispensing {test_quantity}ml")
+    await flash(f"Pump test - dispensing {test_quantity}ml")
     return redirect(url_for('autowater.tests'))
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
     pump = await loaded_pump_from_form()
     if pump is None:
-        flash("Pump not found")
+        await flash("Pump not found")
         return redirect(url_for('autowater.tests'))
     if pump.is_running():
-        flash("Pump is already running")
+        await flash("Pump is already running")
         return redirect(url_for('autowater.tests'))
     if not pump.turn_on():
-        flash("Failed to turn on pump")
+        await flash("Failed to turn on pump")
         return redirect(url_for('autowater.tests'))
     return redirect(url_for('autowater.tests'))
 
@@ -274,9 +274,9 @@ async def turn_on_pump():
 async def turn_off_pump():
     pump = await loaded_pump_from_form()
     if pump is None:
-        flash("Pump not found")
+        await flash("Pump not found")
         return redirect(url_for('autowater.tests'))
     if not pump.turn_off():
-        flash("Failed to turn off pump")
+        await flash("Failed to turn off pump")
         return redirect(url_for('autowater.tests'))
     return redirect(url_for('autowater.tests'))
