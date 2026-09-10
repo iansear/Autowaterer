@@ -176,14 +176,6 @@ footer p {
     margin: 0;
 }
 
-
-.flex-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
 .pump-status-indicator {
     height: 2rem;
     width: 2rem;
