@@ -119,10 +119,10 @@ def create_app():
             )
             print(f'Job {job.name} loaded...')
 
-    @app.before_serving
-    async def load_water_sensor():
-        init_water_sensor()
-        print('Water sensor loaded...')
+    # @app.before_serving
+    # async def load_water_sensor():
+    #     init_water_sensor()
+    #     print('Water sensor loaded...')
 
     @app.after_serving
     async def shutdown_hardware():
@@ -137,7 +137,7 @@ def create_app():
                 print(f'Error closing pump: {e}')
         loaded_pumps.clear()
         print('Pumps closed...')
-        close_water_sensor()
-        print('Water sensor closed...')
+        # close_water_sensor()
+        # print('Water sensor closed...')
 
     return app

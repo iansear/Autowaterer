@@ -55,9 +55,9 @@ async def dashboard():
                 'time': f'{job.hour}:{job.minute:02d}',
             })
     pumps = await list_pumps()
-    sensor = get_water_sensor()
-    water_level = await asyncio.to_thread(sensor.get_distance) if sensor is not None else None
-    print(f'Water level: {water_level}')
+    # sensor = get_water_sensor()
+    # water_level = await asyncio.to_thread(sensor.get_distance) if sensor is not None else None
+    # print(f'Water level: {water_level}')
     return await render_template('dashboard.html', jobs=jobs, pumps=pumps, water_level=water_level)
 
 @bp.route('/schedule')
@@ -247,6 +247,16 @@ async def pump_status():
     except Exception:
         current_app.logger.exception('pump-status websocket error')
         return
+
+# @bp.websocket('/water-level')
+# async def water_level():
+#     try:
+#         while True:
+#             sensor = get_water_sensor()
+#             water_level = await asyncio.to_thread(sensor.get_distance) if sensor is not None else None
+#             await websocket.send(json.dumps({'water_level': water_level}))
+#     except asyncio.CancelledError:
+#         raise
 
 # Test routes
 async def loaded_pump_from_form():
