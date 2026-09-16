@@ -2,7 +2,10 @@ from gpiozero import DistanceSensor
 
 class Sensor(DistanceSensor):
     def __init__(self, echo, trigger):
-        super().__init__(echo, trigger)
+        super().__init__(echo=echo, trigger=trigger)
 
     def get_distance(self):
-        return self.distance
+        distance_m = self.distance
+        if distance_m is None:
+            return None
+        return round(distance_m * 100, 1)

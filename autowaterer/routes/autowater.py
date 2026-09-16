@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from ..classes.pump import Pump as HardwarePump
 from ..config.pump_config import loaded_pumps
 from ..config.schedule_config import scheduler
-from ..config.water_sensor_config import water_sensor
+from ..config.water_sensor_config import get_water_sensor
 from ..db import db
 from ..db.job import Job
 from ..db.pump import Pump
@@ -55,7 +55,8 @@ async def dashboard():
                 'time': f'{job.hour}:{job.minute:02d}',
             })
     pumps = await list_pumps()
-    water_level = water_sensor.get_distance()
+    sensor = get_water_sensor()
+    water_level = sensor.get_distance() if sensor is not None else None
     print(f'Water level: {water_level}')
     return await render_template('dashboard.html', jobs=jobs, pumps=pumps, water_level=water_level)
 

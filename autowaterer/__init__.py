@@ -7,7 +7,7 @@ from sqlalchemy import select
 from .classes.pump import Pump as HardwarePump
 from .config.pump_config import loaded_pumps, stop_all_pumps
 from .config.schedule_config import scheduler
-from .config.water_sensor_config import init_water_sensor
+from .config.water_sensor_config import close_water_sensor, init_water_sensor
 from .db import db
 from .db.user import User
 from .db.job import Job
@@ -136,5 +136,7 @@ def create_app():
                 print(f'Error closing pump: {e}')
         loaded_pumps.clear()
         print('Pumps closed...')
+        close_water_sensor()
+        print('Water sensor closed...')
 
     return app

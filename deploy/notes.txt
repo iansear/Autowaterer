@@ -7,3 +7,6 @@ sudo systemctl stop autowaterer
 sudo systemctl start autowaterer
 sudo systemctl status autowaterer
 journalctl -u autowaterer -e
+
+Local Tests:
+hypercorn run:app --bind 0.0.0.0:8000
