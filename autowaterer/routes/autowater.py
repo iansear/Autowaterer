@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from ..classes.pump import Pump as HardwarePump
 from ..config.pump_config import loaded_pumps
 from ..config.schedule_config import scheduler
-from ..config.water_sensor_config import get_water_sensor
+# from ..config.water_sensor_config import get_water_sensor
 from ..db import db
 from ..db.job import Job
 from ..db.pump import Pump
