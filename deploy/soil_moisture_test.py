@@ -1,5 +1,5 @@
 import spidev
-from time
+from time import sleep
 
 spi = spidev.SpiDev()
 spi.open(0, 0)
@@ -20,4 +20,3 @@ except KeyboardInterrupt:
 finally:
     spi.close()
     print('SPI closed')
-    
