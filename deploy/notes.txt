@@ -1,0 +1,9 @@
+For updates:
+git pull
+sudo systemctl restart autowaterer
+
+Others commands:
+sudo systemctl stop autowaterer
+sudo systemctl start autowaterer
+sudo systemctl status autowaterer
+journalctl -u autowaterer -e

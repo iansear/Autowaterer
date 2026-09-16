@@ -7,6 +7,7 @@ from sqlalchemy import select
 from .classes.pump import Pump as HardwarePump
 from .config.pump_config import loaded_pumps, stop_all_pumps
 from .config.schedule_config import scheduler
+from .config.water_sensor_config import init_water_sensor
 from .db import db
 from .db.user import User
 from .db.job import Job
@@ -116,6 +117,11 @@ def create_app():
                 replace_existing=True,
             )
             print(f'Job {job.name} loaded...')
+
+    @app.before_serving
+    async def load_water_sensor():
+        init_water_sensor()
+        print('Water sensor loaded...')
 
     @app.after_serving
     async def shutdown_hardware():
