@@ -58,7 +58,7 @@ async def dashboard():
     # sensor = get_water_sensor()
     # water_level = await asyncio.to_thread(sensor.get_distance) if sensor is not None else None
     # print(f'Water level: {water_level}')
-    return await render_template('dashboard.html', jobs=jobs, pumps=pumps, water_level=water_level)
+    return await render_template('dashboard.html', jobs=jobs, pumps=pumps)
 
 @bp.route('/schedule')
 async def schedule():
