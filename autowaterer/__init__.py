@@ -39,6 +39,7 @@ def create_app():
                 print('Interrupt pumps for shutdown...')
                 stop.set()
             stop_all_pumps()
+            close_water_sensor()
 
         def wrap_signal(sig):
             handlers = getattr(loop, "_signal_handlers", None)
