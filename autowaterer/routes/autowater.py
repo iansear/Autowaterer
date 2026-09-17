@@ -6,8 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from ..classes.pump import Pump as HardwarePump
 from ..config.pump_config import loaded_pumps
+from ..config.water_level_sensor_config import loaded_water_level_sensors
 from ..config.schedule_config import scheduler
-# from ..config.water_sensor_config import get_water_sensor
 from ..db import db
 from ..db.job import Job
 from ..db.pump import Pump
@@ -30,6 +30,16 @@ async def list_pumps():
             }
             for pump in pumps
         ]
+
+
+def list_water_level_sensors():
+    return [
+        {
+            'id': sensor_id,
+            'name': sensor.name,
+        }
+        for sensor_id, sensor in loaded_water_level_sensors.items()
+    ]
 
 @bp.route('/')
 async def index():
@@ -55,10 +65,13 @@ async def dashboard():
                 'time': f'{job.hour}:{job.minute:02d}',
             })
     pumps = await list_pumps()
-    # sensor = get_water_sensor()
-    # water_level = await asyncio.to_thread(sensor.get_distance) if sensor is not None else None
-    # print(f'Water level: {water_level}')
-    return await render_template('dashboard.html', jobs=jobs, pumps=pumps)
+    water_level_sensors = list_water_level_sensors()
+    return await render_template(
+        'dashboard.html',
+        jobs=jobs,
+        pumps=pumps,
+        water_level_sensors=water_level_sensors,
+    )
 
 @bp.route('/schedule')
 async def schedule():
@@ -180,14 +193,24 @@ async def create_pump():
     form = await request.form
     name = form.get('name')
     description = form.get('description')
-    gpio_pin = int(form.get('gpio_pin'))
-    rate = float(form.get('rate'))
+    try:
+        gpio_pin = int(form.get('gpio_pin'))
+        rate = float(form.get('rate'))
+    except (TypeError, ValueError):
+        await flash('GPIO pin and rate are required.')
+        return await render_template('create_pump.html')
+
     pump = Pump(name=name, description=description, gpio_pin=gpio_pin, rate=rate)
-    async with db.bind.Session() as session:
-        async with session.begin():
-            session.add(pump)
-            await session.flush()
-            loaded_pumps[pump.id] = HardwarePump(gpio_pin, rate)
+    try:
+        async with db.bind.Session() as session:
+            async with session.begin():
+                session.add(pump)
+                await session.flush()
+                loaded_pumps[pump.id] = HardwarePump(gpio_pin, rate)
+    except Exception as e:
+        print(f'Error creating pump: {e}')
+        await flash(f'Error creating pump: {e}')
+        return await render_template('create_pump.html')
     return redirect(url_for('autowater.pumps'))
 
 @bp.route('/delete-pump', methods=['POST'])
@@ -202,8 +225,21 @@ async def delete_pump():
         async with session.begin():
             pump = await session.get(Pump, int(pump_id))
             if pump is not None:
+                jobs = (await session.scalars(select(Job).where(Job.pump_id == pump.id))).all()
+                for job in jobs:
+                    if scheduler.get_job(str(job.id)):
+                        scheduler.remove_job(str(job.id))
+                    await session.delete(job)
                 await session.delete(pump)
-                loaded_pumps.pop(int(pump_id), None)
+                hardware_pump = loaded_pumps.pop(int(pump_id), None)
+                if hardware_pump is not None:
+                    hardware_pump.interrupt()
+                    if hardware_pump.is_running():
+                        hardware_pump.turn_off()
+                    try:
+                        hardware_pump.close()
+                    except Exception as e:
+                        print(f'Error closing pump: {e}')
     return redirect(url_for('autowater.pumps'))
 
 # Web Socket
@@ -248,15 +284,37 @@ async def pump_status():
         current_app.logger.exception('pump-status websocket error')
         return
 
-# @bp.websocket('/water-level')
-# async def water_level():
-#     try:
-#         while True:
-#             sensor = get_water_sensor()
-#             water_level = await asyncio.to_thread(sensor.get_distance) if sensor is not None else None
-#             await websocket.send(json.dumps({'water_level': water_level}))
-#     except asyncio.CancelledError:
-#         raise
+def _water_level_status(sensor):
+    height = sensor.get_water_level_difference_cm()
+    if height is None:
+        percentage = None
+    elif sensor.resevoir_depth <= 0:
+        percentage = None
+    else:
+        percentage = round((height / sensor.resevoir_depth) * 100, 1)
+        percentage = max(0.0, min(100.0, percentage))
+    return {
+        'id': sensor.id,
+        'water_height': height,
+        'water_level_percentage': percentage,
+    }
+
+
+@bp.websocket('/water-level')
+async def water_level():
+    try:
+        while True:
+            statuses = []
+            for sensor in list(loaded_water_level_sensors.values()):
+                statuses.append(await asyncio.to_thread(_water_level_status, sensor))
+            await websocket.send(json.dumps(statuses))
+            if await _wait_for_stop():
+                return
+    except asyncio.CancelledError:
+        raise
+    except Exception:
+        current_app.logger.exception('water-level websocket error')
+        return
 
 # Test routes
 async def loaded_pump_from_form():

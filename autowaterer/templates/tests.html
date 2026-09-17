@@ -6,7 +6,7 @@ Test Page - Autowaterer
 
 {% block content %}
 <h1>Pump Tests</h1>
-<table id="status-container" data-pump-status-url="{{ url_for('autowater.pump_status') }}">
+<table id="pump-status-container" data-pump-status-url="{{ url_for('autowater.pump_status') }}">
     <thead>
         <tr>
             <th>Pump</th>
@@ -53,5 +53,5 @@ Test Page - Autowaterer
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pump_ws.js') }}"></script>
 {% endblock %}

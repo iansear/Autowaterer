@@ -5,13 +5,15 @@ from quart import Quart
 from dotenv import load_dotenv
 from sqlalchemy import select
 from .classes.pump import Pump as HardwarePump
+from .classes.water_level_sensor import WaterLevelSensor as HardwareWaterLevelSensor
 from .config.pump_config import loaded_pumps, stop_all_pumps
 from .config.schedule_config import scheduler
-# from .config.water_sensor_config import close_water_sensor, init_water_sensor
+from .config.water_level_sensor_config import loaded_water_level_sensors, stop_all_water_level_sensors
 from .db import db
 from .db.user import User
 from .db.job import Job
 from .db.pump import Pump
+from .db.water_level_sensor import WaterLevelSensor
 
 def create_app():
     app = Quart(__name__, instance_relative_config=True)
@@ -39,7 +41,7 @@ def create_app():
                 print('Interrupt pumps for shutdown...')
                 stop.set()
             stop_all_pumps()
-            close_water_sensor()
+            stop_all_water_level_sensors()
 
         def wrap_signal(sig):
             handlers = getattr(loop, "_signal_handlers", None)
@@ -119,10 +121,39 @@ def create_app():
             )
             print(f'Job {job.name} loaded...')
 
-    # @app.before_serving
-    # async def load_water_sensor():
-    #     init_water_sensor()
-    #     print('Water sensor loaded...')
+    @app.before_serving
+    async def load_water_level_sensors():
+        async with db.bind.Session() as session:
+            water_level_sensors = (await session.scalars(select(WaterLevelSensor))).all()
+            sensor_rows = [
+                (row.id, row.name, row.echo, row.trigger, row.resevoir_depth)
+                for row in water_level_sensors
+            ]
+        for sensor_id, name, echo, trigger, resevoir_depth in sensor_rows:
+            try:
+                loaded_water_level_sensors[sensor_id] = HardwareWaterLevelSensor(
+                    echo=echo,
+                    trigger=trigger,
+                    id=sensor_id,
+                    name=name,
+                    resevoir_depth=resevoir_depth,
+                )
+                print(f'Water level sensor {name} loaded...')
+            except Exception as e:
+                print(f'Skipping water level sensor {name}: {e}')
+
+        if not loaded_water_level_sensors:
+            try:
+                loaded_water_level_sensors[1] = HardwareWaterLevelSensor(
+                    echo=17,
+                    trigger=4,
+                    id=1,
+                    name='Test',
+                    resevoir_depth=30,
+                )
+                print('Water level sensor Test loaded (no DB rows)...')
+            except Exception as e:
+                print(f'Skipping test water level sensor: {e}')
 
     @app.after_serving
     async def shutdown_hardware():
@@ -137,7 +168,8 @@ def create_app():
                 print(f'Error closing pump: {e}')
         loaded_pumps.clear()
         print('Pumps closed...')
-        # close_water_sensor()
-        # print('Water sensor closed...')
+        stop_all_water_level_sensors()
+        loaded_water_level_sensors.clear()
+        print('Water level sensors closed...')
 
     return app

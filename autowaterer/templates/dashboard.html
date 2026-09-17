@@ -2,6 +2,30 @@
 
 {% block content %}
 <h1>Dashboard</h1>
+<h2>Water Level Sensors</h2>
+<table id="water-level-status-container" data-water-level-status-url="{{ url_for('autowater.water_level') }}">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Water Height</th>
+            <th>Water Level Percentage</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for water_level_sensor in water_level_sensors %}
+        <tr>
+            <td>{{ water_level_sensor.name }}</td>
+            <td>
+                <p class="water-level-height" data-water-level-sensor-id="{{ water_level_sensor.id }}"></p>
+            </td>
+            <td>
+                <p class="water-level-percentage" data-water-level-sensor-id="{{ water_level_sensor.id }}"></p>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p id="water-level-status-text">Connecting...</p>
 <h2>Current Schedule</h2>
 <table>
     <thead>
@@ -24,7 +48,7 @@
     </tbody>
 </table>
 <h2>Pumps</h2>
-<table  id="status-container" data-pump-status-url="{{ url_for('autowater.pump_status') }}">
+<table  id="pump-status-container" data-pump-status-url="{{ url_for('autowater.pump_status') }}">
     <thead>
         <tr>
             <th>Name</th>
@@ -50,5 +74,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pump_ws.js') }}"></script>
+<script src="{{ url_for('static', filename='js/water_level_sensor_ws.js') }}"></script>
 {% endblock %}

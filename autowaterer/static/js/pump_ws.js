@@ -1,16 +1,12 @@
-const statusContainer = document.getElementById('status-container');
+const statusContainer = document.getElementById('pump-status-container');
 const statusText = document.getElementById('pump-status-text');
-
-function pumpStatusSocketUrl() {
-    return statusContainer.dataset.pumpStatusUrl;
-}
 
 function connectPumpStatus() {
     if (!statusContainer || !statusText) {
         return;
     }
 
-    const socket = new WebSocket(pumpStatusSocketUrl());
+    const socket = new WebSocket(statusContainer.dataset.pumpStatusUrl);
 
     socket.onopen = () => {
         statusText.textContent = 'Connected.';
