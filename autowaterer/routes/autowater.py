@@ -5,12 +5,14 @@ import json
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from ..classes.pump import Pump as HardwarePump
+from ..classes.water_level_sensor import WaterLevelSensor as HardwareWaterLevelSensor
 from ..config.pump_config import loaded_pumps
 from ..config.water_level_sensor_config import loaded_water_level_sensors
 from ..config.schedule_config import scheduler
 from ..db import db
 from ..db.job import Job
 from ..db.pump import Pump
+from ..db.water_level_sensor import WaterLevelSensor
 
 JOB_FUNCTION = 'run_water_pump'
 
@@ -32,11 +34,14 @@ async def list_pumps():
         ]
 
 
-def list_water_level_sensors():
+async def list_water_level_sensors():
+    async with db.bind.Session() as session:
+        water_level_sensors = (await session.scalars(select(WaterLevelSensor))).all()
     return [
         {
             'id': sensor_id,
             'name': sensor.name,
+            'resevoir_depth': sensor.resevoir_depth,
         }
         for sensor_id, sensor in loaded_water_level_sensors.items()
     ]
@@ -98,6 +103,10 @@ async def schedule():
 @bp.route('/pumps')
 async def pumps():
     return await render_template('pumps.html', pumps=await list_pumps())
+
+@bp.route('/sensors')
+async def sensors():
+    return await render_template('sensors.html', water_level_sensors=await list_water_level_sensors())
 
 @bp.route('/tests')
 async def tests():
@@ -241,6 +250,75 @@ async def delete_pump():
                     except Exception as e:
                         print(f'Error closing pump: {e}')
     return redirect(url_for('autowater.pumps'))
+
+# Water Level Sensor routes
+@bp.route('/create-water-level-sensor', methods=['GET', 'POST'])
+async def create_water_level_sensor():
+    if request.method == 'GET':
+        return await render_template('create_water_level_sensor.html')
+
+    form = await request.form
+    name = form.get('name')
+    trigger_pin = form.get('trigger_pin')
+    echo_pin = form.get('echo_pin')
+
+    try:
+        trigger_pin = int(trigger_pin)
+        echo_pin = int(echo_pin)
+    except (TypeError, ValueError):
+        await flash('Trigger pin and echo pin are required.')
+        return await render_template('create_water_level_sensor.html')
+
+    try:
+        water_level_sensor = WaterLevelSensor(
+            name=name,
+            trigger=trigger_pin,
+            echo=echo_pin,
+            resevoir_depth=0,
+        )
+        async with db.bind.Session() as session:
+            async with session.begin():
+                session.add(water_level_sensor)
+                await session.flush()
+                hardware_water_level_sensor = HardwareWaterLevelSensor(
+                    echo=echo_pin,
+                    trigger=trigger_pin,
+                    id=water_level_sensor.id,
+                    name=name,
+                )
+                loaded_water_level_sensors[water_level_sensor.id] = hardware_water_level_sensor
+                hardware_water_level_sensor.calibrate() 
+                water_level_sensor.resevoir_depth = hardware_water_level_sensor.get_resevoir_depth()
+                await session.commit()
+    except Exception as e:
+        print(f'Error creating water level sensor: {e}')
+        await flash(f'Error creating water level sensor: {e}')
+        return await render_template('create_water_level_sensor.html')
+    return redirect(url_for('autowater.sensors'))
+
+@bp.route('/delete-water-level-sensor', methods=['POST'])
+async def delete_water_level_sensor():
+    form = await request.form
+    water_level_sensor_id = form.get('water_level_sensor_id')
+    if not water_level_sensor_id:
+        await flash('Water level sensor id is required!')
+        return redirect(url_for('autowater.sensors'))
+
+    async with db.bind.Session() as session:
+        async with session.begin():
+            water_level_sensor = await session.get(WaterLevelSensor, int(water_level_sensor_id))
+            if water_level_sensor is not None:
+                await session.delete(water_level_sensor)
+                hardware_water_level_sensor = loaded_water_level_sensors.pop(int(water_level_sensor_id), None)
+                if hardware_water_level_sensor is not None:
+                    hardware_water_level_sensor.interrupt()
+                    if hardware_water_level_sensor.is_running():
+                        hardware_water_level_sensor.turn_off()
+                    try:
+                        hardware_water_level_sensor.close()
+                    except Exception as e:
+                        print(f'Error closing water level sensor: {e}')
+    return redirect(url_for('autowater.sensors'))
 
 # Web Socket
 async def _wait_for_stop(delay=0.5):

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Sensors</h1>
+
+<h2>Water Level Sensors</h2>    
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Resevoir Depth</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for water_level_sensor in water_level_sensors %}
+        <tr>
+            <td>{{ water_level_sensor.name }}</td>
+            <td>{{ water_level_sensor.resevoir_depth }} cm</td>
+            <td>
+                <form action="{{ url_for('autowater.delete_water_level_sensor') }}" method="post">
+                    <input type="hidden" name="water_level_sensor_id" value="{{ water_level_sensor.id }}">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p>To automatically calibrate the water level sensor, make sure the water reservoir is empty.</p>
+<p><a class="button" href="{{ url_for('autowater.create_water_level_sensor') }}">Create Water Level Sensor</a></p>
+{% endblock %}

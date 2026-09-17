@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Create Water Level Sensor</h1>
+<form action="{{ url_for('autowater.create_water_level_sensor') }}" method="post">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name" required>
+
+    <label for="trigger_pin">Trigger GPIO pin</label>
+    <input type="number" name="trigger_pin" id="trigger_pin" required>
+
+    <label for="echo_pin">Echo GPIO pin</label>
+    <input type="number" name="echo_pin" id="echo_pin" required>
+
+    <button type="submit">Create Water Level Sensor</button>
+</form>
+<p><a class="button" href="{{ url_for('autowater.sensors') }}">Back to sensors</a></p>
+{% endblock %}

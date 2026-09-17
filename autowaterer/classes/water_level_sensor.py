@@ -38,3 +38,6 @@ class WaterLevelSensor(DistanceSensor):
         if distance_cm is None:
             return None
         return round(self.resevoir_depth - distance_cm, 1)
+
+    def calibrate(self):
+        self.resevoir_depth = self.get_distance_cm()

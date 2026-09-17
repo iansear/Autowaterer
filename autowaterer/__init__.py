@@ -142,18 +142,18 @@ def create_app():
             except Exception as e:
                 print(f'Skipping water level sensor {name}: {e}')
 
-        if not loaded_water_level_sensors:
-            try:
-                loaded_water_level_sensors[1] = HardwareWaterLevelSensor(
-                    echo=17,
-                    trigger=4,
-                    id=1,
-                    name='Test',
-                    resevoir_depth=30,
-                )
-                print('Water level sensor Test loaded (no DB rows)...')
-            except Exception as e:
-                print(f'Skipping test water level sensor: {e}')
+        # if not loaded_water_level_sensors:
+        #     try:
+        #         loaded_water_level_sensors[1] = HardwareWaterLevelSensor(
+        #             echo=17,
+        #             trigger=4,
+        #             id=1,
+        #             name='Test',
+        #             resevoir_depth=30,
+        #         )
+        #         print('Water level sensor Test loaded (no DB rows)...')
+        #     except Exception as e:
+        #         print(f'Skipping test water level sensor: {e}')
 
     @app.after_serving
     async def shutdown_hardware():
