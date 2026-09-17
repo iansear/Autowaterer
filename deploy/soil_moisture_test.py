@@ -20,3 +20,6 @@ except KeyboardInterrupt:
 finally:
     spi.close()
     print('SPI closed')
+
+# 764 is dry
+# 420 is moist

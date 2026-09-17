@@ -2,7 +2,7 @@ from gpiozero import DistanceSensor
 from time import sleep
 
 # partial=True so a missing echo does not hang on queue.full.wait()
-sensor = DistanceSensor(echo=17, trigger=4, max_distance=2, queue_len=5, partial=True)
+sensor = DistanceSensor(echo=17, trigger=4)#, max_distance=2, queue_len=5, partial=True)
 
 try:
     while True:
@@ -18,3 +18,6 @@ except KeyboardInterrupt:
 finally:
     sensor.close()
     print('Sensor closed')
+
+# 31 is empty
+# 28 is low
