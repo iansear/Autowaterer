@@ -108,10 +108,6 @@ async def pumps():
 async def sensors():
     return await render_template('sensors.html', water_level_sensors=await list_water_level_sensors())
 
-# @bp.route('/tests')
-# async def tests():
-#     return await render_template('tests.html', pumps=await list_pumps())
-
 # Job routes
 @bp.route('/create-job', methods=['GET', 'POST'])
 async def create_job():
@@ -416,33 +412,33 @@ async def test_water():
     pump = await loaded_pump_from_form()
     if pump is None:
         await flash("Pump not found")
-        return redirect(url_for('autowater.tests'))
+        return redirect(url_for('autowater.pumps'))
     test_quantity = 200
     current_app.add_background_task(pump.run_water_pump, test_quantity)
     await flash(f"Pump test - dispensing {test_quantity}ml")
-    return redirect(url_for('autowater.tests'))
+    return redirect(url_for('autowater.pumps'))
 
 @bp.route('/turn-on-pump', methods=['POST'])
 async def turn_on_pump():
     pump = await loaded_pump_from_form()
     if pump is None:
         await flash("Pump not found")
-        return redirect(url_for('autowater.tests'))
+        return redirect(url_for('autowater.pumps'))
     if pump.is_running():
         await flash("Pump is already running")
-        return redirect(url_for('autowater.tests'))
+        return redirect(url_for('autowater.pumps'))
     if not pump.turn_on():
         await flash("Failed to turn on pump")
-        return redirect(url_for('autowater.tests'))
-    return redirect(url_for('autowater.tests'))
+        return redirect(url_for('autowater.pumps'))
+    return redirect(url_for('autowater.pumps'))
 
 @bp.route('/turn-off-pump', methods=['POST'])
 async def turn_off_pump():
     pump = await loaded_pump_from_form()
     if pump is None:
         await flash("Pump not found")
-        return redirect(url_for('autowater.tests'))
+        return redirect(url_for('autowater.pumps'))
     if not pump.turn_off():
         await flash("Failed to turn off pump")
-        return redirect(url_for('autowater.tests'))
-    return redirect(url_for('autowater.tests'))
+        return redirect(url_for('autowater.pumps'))
+    return redirect(url_for('autowater.pumps'))
