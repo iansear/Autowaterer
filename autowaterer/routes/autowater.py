@@ -108,9 +108,9 @@ async def pumps():
 async def sensors():
     return await render_template('sensors.html', water_level_sensors=await list_water_level_sensors())
 
-@bp.route('/tests')
-async def tests():
-    return await render_template('tests.html', pumps=await list_pumps())
+# @bp.route('/tests')
+# async def tests():
+#     return await render_template('tests.html', pumps=await list_pumps())
 
 # Job routes
 @bp.route('/create-job', methods=['GET', 'POST'])
