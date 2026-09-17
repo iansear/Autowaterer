@@ -10,7 +10,12 @@ try:
         if distance_m is None:
             print('Water level: no echo (check wiring, 5V echo divider, and that trigger/echo are not swapped)')
         else:
-            print(f'Water level: {distance_m * 100:.2f} cm')
+            distance_cm = distance_m * 100
+            print(f'Water level: {distance_cm:.2f} cm')
+            difference = 31 - distance_cm
+            print(f'Difference: {difference:.2f} cm')
+            percentage = round((difference / 31) * 100, 1)
+            print(f'Percentage: {percentage:.2f}%')
         sleep(1)
 
 except KeyboardInterrupt:
