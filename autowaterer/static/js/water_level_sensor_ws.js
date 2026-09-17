@@ -1,15 +1,15 @@
-const statusContainer = document.getElementById('water-level-status-container');
-const statusText = document.getElementById('water-level-status-text');
+const waterLevelStatusContainer = document.getElementById('water-level-status-container');
+const waterLevelStatusText = document.getElementById('water-level-status-text');
 
 function connectWaterLevelStatus() {
-    if (!statusContainer || !statusText) {
+    if (!waterLevelStatusContainer || !waterLevelStatusText) {
         return;
     }
 
-    const socket = new WebSocket(statusContainer.dataset.waterLevelStatusUrl);
+    const socket = new WebSocket(waterLevelStatusContainer.dataset.waterLevelStatusUrl);
 
     socket.onopen = () => {
-        statusText.textContent = 'Connected.';
+        waterLevelStatusText.textContent = 'Connected.';
     };
 
     socket.onmessage = (event) => {
@@ -35,12 +35,12 @@ function connectWaterLevelStatus() {
     };
 
     socket.onclose = () => {
-        statusText.textContent = 'Disconnected. Reconnecting...';
+        waterLevelStatusText.textContent = 'Disconnected. Reconnecting...';
         setTimeout(connectWaterLevelStatus, 2000);
     };
 
     socket.onerror = () => {
-        statusText.textContent = 'Error. Reconnecting...';
+        waterLevelStatusText.textContent = 'Error. Reconnecting...';
         socket.close();
     };
 }
