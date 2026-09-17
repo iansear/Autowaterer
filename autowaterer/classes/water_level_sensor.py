@@ -1,4 +1,5 @@
 from gpiozero import DistanceSensor
+import time
 
 class WaterLevelSensor(DistanceSensor):
     def __init__(self, echo, trigger, id=None, name='Unknown', resevoir_depth=30):
@@ -39,5 +40,20 @@ class WaterLevelSensor(DistanceSensor):
             return None
         return round(self.resevoir_depth - distance_cm, 1)
 
-    def calibrate(self):
-        self.resevoir_depth = self.get_distance_cm()
+    def calibrate(self, timeout=4.0):
+        deadline = time.monotonic() + timeout
+        samples = []
+        while time.monotonic() < deadline:
+            depth = self.get_distance_cm()
+            if depth is not None and depth > 1:
+                samples.append(depth)
+                if len(samples) >= 3:
+                    break
+            time.sleep(0.25)
+        if not samples:
+            raise ValueError(
+                'Could not calibrate. Empty the reservoir and check the sensor echo.'
+            )
+        self.resevoir_depth = round(sum(samples) / len(samples), 1)
+        self.max_distance = max(self.resevoir_depth / 100.0, 0.2) + 0.3
+        return self.resevoir_depth

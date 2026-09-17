@@ -269,6 +269,8 @@ async def create_water_level_sensor():
         await flash('Trigger pin and echo pin are required.')
         return await render_template('create_water_level_sensor.html')
 
+    hardware_water_level_sensor = None
+    water_level_sensor = None
     try:
         water_level_sensor = WaterLevelSensor(
             name=name,
@@ -285,12 +287,21 @@ async def create_water_level_sensor():
                     trigger=trigger_pin,
                     id=water_level_sensor.id,
                     name=name,
+                    resevoir_depth=200,
                 )
                 loaded_water_level_sensors[water_level_sensor.id] = hardware_water_level_sensor
-                hardware_water_level_sensor.calibrate() 
-                water_level_sensor.resevoir_depth = hardware_water_level_sensor.get_resevoir_depth()
-                await session.commit()
+                water_level_sensor.resevoir_depth = await asyncio.to_thread(
+                    hardware_water_level_sensor.calibrate
+                )
     except Exception as e:
+        sensor_id = getattr(water_level_sensor, 'id', None)
+        if sensor_id is not None:
+            loaded_water_level_sensors.pop(sensor_id, None)
+        if hardware_water_level_sensor is not None:
+            try:
+                hardware_water_level_sensor.close()
+            except Exception:
+                pass
         print(f'Error creating water level sensor: {e}')
         await flash(f'Error creating water level sensor: {e}')
         return await render_template('create_water_level_sensor.html')
@@ -311,9 +322,6 @@ async def delete_water_level_sensor():
                 await session.delete(water_level_sensor)
                 hardware_water_level_sensor = loaded_water_level_sensors.pop(int(water_level_sensor_id), None)
                 if hardware_water_level_sensor is not None:
-                    hardware_water_level_sensor.interrupt()
-                    if hardware_water_level_sensor.is_running():
-                        hardware_water_level_sensor.turn_off()
                     try:
                         hardware_water_level_sensor.close()
                     except Exception as e:
