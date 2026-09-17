@@ -70,7 +70,7 @@ async def dashboard():
                 'time': f'{job.hour}:{job.minute:02d}',
             })
     pumps = await list_pumps()
-    water_level_sensors = list_water_level_sensors()
+    water_level_sensors = await list_water_level_sensors()
     return await render_template(
         'dashboard.html',
         jobs=jobs,
