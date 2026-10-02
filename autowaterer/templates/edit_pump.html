@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Edit Pump - Autowaterer
+{% endblock %}
+
+{% block content %}
+<h1>Edit Pump</h1>
+<form action="{{ url_for('autowater.edit_pump', pump_id=pump.id) }}" method="post">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name" value="{{ pump.name }}" required>
+
+    <label for="description">Description</label>
+    <input type="text" name="description" id="description" value="{{ pump.description }}" required>
+
+    <label for="gpio_pin">GPIO pin</label>
+    <input type="number" name="gpio_pin" id="gpio_pin" value="{{ pump.gpio_pin }}" required>
+
+    <label for="rate">Rate (ml/s)</label>
+    <input type="number" name="rate" id="rate" step="0.01" value="{{ pump.rate }}" required>
+
+    <button type="submit">Edit Pump</button>
+</form>
+<p><a class="button" href="{{ url_for('autowater.pumps') }}">Back to pumps</a></p>
+{% endblock %}

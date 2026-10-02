@@ -220,6 +220,45 @@ async def create_pump():
         return await render_template('create_pump.html')
     return redirect(url_for('autowater.pumps'))
 
+@bp.route('/edit-pump/<int:pump_id>', methods=['GET', 'POST'])
+async def edit_pump():
+    pump = await db.bind.Session().get(Pump, pump_id)
+    if request.method == 'GET':
+        if pump is None:
+            await flash('Pump not found!')
+            return redirect(url_for('autowater.pumps'))
+        return await render_template('edit_pump.html', pump=pump)
+
+    form = await request.form
+    name = form.get('name')
+    description = form.get('description')
+    rate = form.get('rate')
+    gpio_pin = form.get('gpio_pin')
+    if not (name and description and rate and gpio_pin):
+        await flash('Name, description, rate, and GPIO pin are required!')
+        return await render_template('edit_pump.html', pump=pump)
+
+    try:
+        gpio_pin = int(gpio_pin)
+        rate = float(rate)
+    except (TypeError, ValueError):
+        await flash('GPIO pin and rate are required.')
+        return await render_template('edit_pump.html', pump=pump)
+
+    async with db.bind.Session() as session:
+        async with session.begin():
+            pump = await session.get(Pump, int(pump_id))
+            if pump is not None:
+                pump.name = name
+                pump.description = description
+                pump.rate = rate
+                pump.gpio_pin = gpio_pin
+                await session.commit()
+                hardware_pump = loaded_pumps.get(pump.id)
+                if hardware_pump is not None:
+                    hardware_pump.set_rate(rate)
+    return redirect(url_for('autowater.pumps'))
+
 @bp.route('/delete-pump', methods=['POST'])
 async def delete_pump():
     form = await request.form
