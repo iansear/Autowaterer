@@ -254,10 +254,9 @@ async def edit_pump(pump_id):
                 pump.description = description
                 pump.rate = rate
                 pump.gpio_pin = gpio_pin
-                await session.commit()
-                hardware_pump = loaded_pumps.get(pump.id)
-                if hardware_pump is not None:
-                    hardware_pump.set_rate(rate)
+    hardware_pump = loaded_pumps.get(pump_id)
+    if hardware_pump is not None:
+        hardware_pump.set_rate(rate)
     return redirect(url_for('autowater.pumps'))
 
 @bp.route('/delete-pump', methods=['POST'])
