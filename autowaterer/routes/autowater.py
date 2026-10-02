@@ -221,8 +221,9 @@ async def create_pump():
     return redirect(url_for('autowater.pumps'))
 
 @bp.route('/edit-pump/<int:pump_id>', methods=['GET', 'POST'])
-async def edit_pump():
-    pump = await db.bind.Session().get(Pump, pump_id)
+async def edit_pump(pump_id):
+    async with db.bind.Session() as session:
+        pump = await session.get(Pump, pump_id)
     if request.method == 'GET':
         if pump is None:
             await flash('Pump not found!')
