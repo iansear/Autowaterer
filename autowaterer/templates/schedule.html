@@ -11,7 +11,6 @@
             <th>Pump</th>
             <th>Quantity</th>
             <th>Time</th>
-            <th>Minute</th>
             <th>Created At</th>
             <th></th>
         </tr>
@@ -22,9 +21,8 @@
             <td>{{ job.name }}</td>
             <td>{{ job.next_run_time }}</td>
             <td>{{ job.pump }}</td>
-            <td>{{ job.quantity }}</td>
+            <td>{{ job.quantity }} ml</td>
             <td>{{ job.time }}</td>
-            <td>{{ job.minute }}</td>
             <td>{{ job.created_at }}</td>
             <td>
                 <form action="{{ url_for('autowater.delete_job') }}" method="post">
