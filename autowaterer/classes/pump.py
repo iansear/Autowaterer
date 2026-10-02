@@ -1,11 +1,11 @@
+from gpiozero import OutputDevice
 from datetime import datetime
-from .relay import Relay
 import threading
 import time
 
-class Pump(Relay):
+class Pump(OutputDevice):
     def __init__(self, gpio_pin, rate=1.25):
-        super().__init__(gpio_pin, active_high=False)
+        super().__init__(pin=gpio_pin, active_high=False)
         self.lock = threading.Lock()
         self.rate = rate
         self.start_time = None
