@@ -39,11 +39,13 @@ async def list_water_level_sensors():
         water_level_sensors = (await session.scalars(select(WaterLevelSensor))).all()
     return [
         {
-            'id': sensor_id,
+            'id': sensor.id,
             'name': sensor.name,
             'resevoir_depth': sensor.resevoir_depth,
+            'trigger_pin': sensor.trigger,
+            'echo_pin': sensor.echo,
         }
-        for sensor_id, sensor in loaded_water_level_sensors.items()
+        for sensor in water_level_sensors
     ]
 
 @bp.route('/')

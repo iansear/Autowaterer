@@ -13,6 +13,8 @@ class WaterLevelSensor(DistanceSensor):
         )
         self.id = id
         self.name = name
+        self.echo = echo
+        self.trigger = trigger
         self.resevoir_depth = float(resevoir_depth)
 
     def get_resevoir_depth(self):
@@ -31,7 +33,7 @@ class WaterLevelSensor(DistanceSensor):
         height = self.get_water_level_difference_cm()
         if height is None or self.resevoir_depth <= 0:
             return None
-        percentage = round((height / self.resevoir_depth) * 100, 1)
+        percentage = round((height - 10 / self.resevoir_depth) * 100, 1)
         return max(0.0, min(100.0, percentage))
 
     def get_water_level_difference_cm(self):

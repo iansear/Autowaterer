@@ -9,6 +9,8 @@
         <tr>
             <th>Name</th>
             <th>Resevoir Depth</th>
+            <th>Trigger Pin</th>
+            <th>Echo Pin</th>
             <th></th>
         </tr>
     </thead>
@@ -17,6 +19,8 @@
         <tr>
             <td>{{ water_level_sensor.name }}</td>
             <td>{{ water_level_sensor.resevoir_depth }} cm</td>
+            <td>{{ water_level_sensor.trigger_pin }}</td>
+            <td>{{ water_level_sensor.echo_pin }}</td>
             <td>
                 <form action="{{ url_for('autowater.delete_water_level_sensor') }}" method="post">
                     <input type="hidden" name="water_level_sensor_id" value="{{ water_level_sensor.id }}">
