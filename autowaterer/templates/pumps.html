@@ -16,7 +16,7 @@
     <tbody>
         {% for pump in pumps %}
         <tr>
-            <td>{{ pump.name }}</td>
+            <td><a href="{{ url_for('autowater.edit_pump', pump_id=pump.id) }}">{{ pump.name }}</a></td>
             <td>{{ pump.description }}</td>
             <td>{{ pump.gpio_pin }}</td>
             <td>{{ pump.rate }}</td>
